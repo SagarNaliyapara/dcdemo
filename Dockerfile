@@ -14,20 +14,26 @@ RUN apt-get update && apt-get install -y \
         bcmath \
         gd
 
+# Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /app
 
-COPY composer.json composer.lock ./
+# ✅ Copy FULL project first (IMPORTANT FIX)
+COPY . .
 
+# ✅ Now run composer
 RUN composer install \
     --no-dev \
     --optimize-autoloader \
     --no-interaction \
     --prefer-dist
 
-COPY . .
+# Laravel optimization (optional but safe now)
+RUN php artisan config:cache || true
+RUN php artisan route:cache || true
 
+# Permissions
 RUN chmod -R 775 storage bootstrap/cache
 
 EXPOSE 8000
