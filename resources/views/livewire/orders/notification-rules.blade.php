@@ -105,9 +105,12 @@
                 <table class="min-w-full text-sm">
                     <thead class="border-b border-slate-200 bg-slate-50">
                         <tr>
-                            @foreach(['Rule', 'Recipient', 'Schedule', 'Last Result', 'Status', 'Actions'] as $heading)
-                                <th class="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">{{ $heading }}</th>
-                            @endforeach
+                            <th class="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">Rule</th>
+                            <th class="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">Recipient</th>
+                            <th class="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">Schedule</th>
+                            <th class="w-36 px-4 py-3 text-left text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">Last Result</th>
+                            <th class="w-24 px-4 py-3 text-left text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">Status</th>
+                            <th class="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-200">
@@ -124,12 +127,14 @@
                                     <div>Next: {{ $rule->next_run_at?->format('d M Y H:i') ?? 'Not scheduled' }}</div>
                                     <div class="mt-1 text-xs text-slate-500">Last: {{ $rule->last_run_at?->diffForHumans() ?? 'Never' }}</div>
                                 </td>
-                                <td class="px-4 py-4">
-                                    <span class="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-700">
+                                <td class="w-36 px-4 py-4">
+                                    <span class="whitespace-nowrap rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-700">
                                         {{ $rule->last_result_count !== null ? number_format($rule->last_result_count).' matches' : 'No run yet' }}
                                     </span>
                                     @if($rule->last_error_message)
-                                        <p class="mt-2 max-w-xs text-xs text-rose-600">{{ $rule->last_error_message }}</p>
+                                        <p class="mt-2 text-xs leading-4 text-rose-600 break-words" title="{{ $rule->last_error_message }}">
+                                            {{ \Illuminate\Support\Str::limit($rule->last_error_message, 60) }}
+                                        </p>
                                     @endif
                                 </td>
                                 <td class="px-4 py-4">
