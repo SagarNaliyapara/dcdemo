@@ -1,45 +1,42 @@
-# Use latest stable PHP (Laravel 13 supports 8.3)
 FROM php:8.3-cli
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
-    git \
-    curl \
-    unzip \
-    libzip-dev \
-    zip \
-    libonig-dev \
-    libxml2-dev \
+    git curl unzip zip \
+    libzip-dev libonig-dev libxml2-dev \
+    libicu-dev libpng-dev libjpeg-dev libfreetype6-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install \
-    pdo \
-    pdo_mysql \
-    mbstring \
-    zip \
-    exif \
-    pcntl
+        pdo \
+        pdo_mysql \
+        mbstring \
+        zip \
+        exif \
+        pcntl \
+        bcmath \
+        intl \
+        gd
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Set working directory
 WORKDIR /var/www
 
-# Copy project files
+# Copy only composer files first (IMPORTANT for caching & fewer errors)
+COPY composer.json composer.lock ./
+
+# Install dependencies (no scripts to avoid Laravel boot issues)
+RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
+
+# Copy rest of project
 COPY . .
 
-# Install PHP dependencies
-RUN composer install --no-dev --optimize-autoloader --no-interaction
+# Now run Laravel commands
+RUN php artisan package:discover || true
 
-# Laravel optimizations
-RUN php artisan config:cache || true
-RUN php artisan route:cache || true
-RUN php artisan view:cache || true
-
-# Set correct permissions
+# Permissions
 RUN chmod -R 775 storage bootstrap/cache
 
-# Expose port
 EXPOSE 8000
 
-# Start Laravel server
-CMD php artisan serve --host=0.0.0.0 --port=8000
+CMD php -S 0.0.0.0:8000 -t public
