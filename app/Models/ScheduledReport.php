@@ -9,9 +9,9 @@ class ScheduledReport extends Model
 {
     protected $casts = [
         'filters_json' => 'array',
-        'is_active'    => 'boolean',
-        'last_run_at'  => 'datetime',
-        'next_run_at'  => 'datetime',
+        'is_active' => 'boolean',
+        'last_run_at' => 'datetime',
+        'next_run_at' => 'datetime',
     ];
 
     public function user(): BelongsTo

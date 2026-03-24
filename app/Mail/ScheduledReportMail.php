@@ -18,8 +18,8 @@ class ScheduledReportMail extends Mailable
 
     public function __construct(
         public readonly ScheduledReport $report,
-        public readonly Collection      $orders,
-        public readonly string          $csv,
+        public readonly Collection $orders,
+        public readonly string $csv,
     ) {}
 
     public function envelope(): Envelope

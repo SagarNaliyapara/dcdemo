@@ -9,12 +9,13 @@ use Illuminate\Console\Command;
 
 class SendScheduledReports extends Command
 {
-    protected $signature   = 'reports:send-scheduled';
+    protected $signature = 'reports:send-scheduled';
+
     protected $description = 'Dispatch queued jobs for all due scheduled order history reports';
 
     public function handle(): int
     {
-        $now     = Carbon::now();
+        $now = Carbon::now();
         $reports = ScheduledReport::query()
             ->where('is_active', true)
             ->where('next_run_at', '<=', $now)
@@ -22,6 +23,7 @@ class SendScheduledReports extends Command
 
         if ($reports->isEmpty()) {
             $this->info('No scheduled reports are due.');
+
             return self::SUCCESS;
         }
 
@@ -31,6 +33,7 @@ class SendScheduledReports extends Command
             // Skip if already sent today (prevent duplicate runs)
             if ($report->last_run_at && $report->last_run_at->isToday()) {
                 $this->line("  Skip  #{$report->id} — already dispatched today.");
+
                 continue;
             }
 

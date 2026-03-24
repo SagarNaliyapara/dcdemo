@@ -87,17 +87,17 @@ class OrderSeeder extends Seeder
     public function run(): void
     {
         $rows = [];
-        $now  = Carbon::now();
+        $now = Carbon::now();
 
         for ($i = 1; $i <= 150; $i++) {
-            $product  = $this->products[array_rand($this->products)];
+            $product = $this->products[array_rand($this->products)];
             $supplier = $this->suppliers[array_rand($this->suppliers)];
             $category = $this->categories[array_rand($this->categories)];
-            $dtCat    = $this->dtCategories[array_rand($this->dtCategories)];
-            $stock    = $this->stockStatuses[array_rand($this->stockStatuses)];
-            $flag     = $this->flags[array_rand($this->flags)];
+            $dtCat = $this->dtCategories[array_rand($this->dtCategories)];
+            $stock = $this->stockStatuses[array_rand($this->stockStatuses)];
+            $flag = $this->flags[array_rand($this->flags)];
             $response = $this->responses[array_rand($this->responses)];
-            $note     = $this->notes[array_rand($this->notes)];
+            $note = $this->notes[array_rand($this->notes)];
 
             // Spread dates across last 60 days — ensures today/yesterday/last7days all have hits
             $daysAgo = match (true) {
@@ -106,7 +106,7 @@ class OrderSeeder extends Seeder
                 $i <= 40 => random_int(2, 3),         // last 3 days
                 $i <= 70 => random_int(4, 7),         // last 7 days
                 $i <= 110 => random_int(8, 30),       // this month range
-                default   => random_int(31, 60),      // last month
+                default => random_int(31, 60),      // last month
             };
 
             $orderDate = $now->copy()->subDays($daysAgo)->setTime(random_int(7, 18), random_int(0, 59));
@@ -114,45 +114,45 @@ class OrderSeeder extends Seeder
             $dtPrice = round(random_int(50, 5000) / 100, 4);
 
             // Some orders above DT, some below — ensures DT filter works
-            $aboveDT  = ($i % 5 === 0);
-            $price    = $aboveDT
+            $aboveDT = ($i % 5 === 0);
+            $price = $aboveDT
                 ? round($dtPrice * (1 + random_int(5, 30) / 100), 4)
                 : round($dtPrice * (1 - random_int(0, 15) / 100), 4);
 
             $maxPrice = round($dtPrice * 1.05, 4);
-            $qty      = random_int(1, 500);
+            $qty = random_int(1, 500);
             $approvedQty = (int) round($qty * (random_int(80, 100) / 100));
 
             $rows[] = [
-                'order_number'       => 'ORD-'.str_pad((string) (1000 + $i), 6, '0', STR_PAD_LEFT),
-                'ordernumber'        => 'ON-'.str_pad((string) (1000 + $i), 6, '0', STR_PAD_LEFT),
-                'product_id'         => random_int(100, 9999),
-                'product_description'=> $product['desc'],
-                'pipcode'            => $product['pip'],
-                'supplier_id'        => $supplier,
-                'quantity'           => $qty,
-                'approved_qty'       => $approvedQty,
-                'price'              => $price,
-                'max_price'          => $maxPrice,
-                'dt_price'           => $dtPrice,
-                'rule_price'         => round($dtPrice * 0.98, 4),
-                'parent_id'          => ($i % 10 === 0) ? random_int(1, $i) : null,
-                'status'             => 'processed',
-                'sent_date'          => $orderDate->toDateTimeString(),
-                'is_opened'          => (bool) random_int(0, 1),
-                'is_transmitted'     => (bool) random_int(0, 1),
-                'transmit_method'    => ['EDI', 'Email', 'Fax', 'Portal'][random_int(0, 3)],
-                'transmit_date'      => $orderDate->copy()->addMinutes(random_int(5, 60))->toDateTimeString(),
-                'orderdate'          => $orderDate->toDateTimeString(),
-                'response'           => $response,
-                'category'           => $category,
-                'price_range'        => $dtCat,
-                'source'             => ['Manual', 'Automatic', 'Imported'][random_int(0, 2)],
-                'notes'              => $note,
-                'flag'               => $flag,
-                'stock_status'       => $stock,
-                'created_at'         => $orderDate->toDateTimeString(),
-                'updated_at'         => $orderDate->toDateTimeString(),
+                'order_number' => 'ORD-'.str_pad((string) (1000 + $i), 6, '0', STR_PAD_LEFT),
+                'ordernumber' => 'ON-'.str_pad((string) (1000 + $i), 6, '0', STR_PAD_LEFT),
+                'product_id' => random_int(100, 9999),
+                'product_description' => $product['desc'],
+                'pipcode' => $product['pip'],
+                'supplier_id' => $supplier,
+                'quantity' => $qty,
+                'approved_qty' => $approvedQty,
+                'price' => $price,
+                'max_price' => $maxPrice,
+                'dt_price' => $dtPrice,
+                'rule_price' => round($dtPrice * 0.98, 4),
+                'parent_id' => ($i % 10 === 0) ? random_int(1, $i) : null,
+                'status' => 'processed',
+                'sent_date' => $orderDate->toDateTimeString(),
+                'is_opened' => (bool) random_int(0, 1),
+                'is_transmitted' => (bool) random_int(0, 1),
+                'transmit_method' => ['EDI', 'Email', 'Fax', 'Portal'][random_int(0, 3)],
+                'transmit_date' => $orderDate->copy()->addMinutes(random_int(5, 60))->toDateTimeString(),
+                'orderdate' => $orderDate->toDateTimeString(),
+                'response' => $response,
+                'category' => $category,
+                'price_range' => $dtCat,
+                'source' => ['Manual', 'Automatic', 'Imported'][random_int(0, 2)],
+                'notes' => $note,
+                'flag' => $flag,
+                'stock_status' => $stock,
+                'created_at' => $orderDate->toDateTimeString(),
+                'updated_at' => $orderDate->toDateTimeString(),
             ];
         }
 

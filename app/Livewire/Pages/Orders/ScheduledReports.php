@@ -5,6 +5,7 @@ namespace App\Livewire\Pages\Orders;
 use App\Livewire\Forms\EditScheduledReportForm;
 use App\Models\ScheduledReport;
 use App\Services\ScheduledReportService;
+use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -41,8 +42,8 @@ class ScheduledReports extends Component
 
         app(ScheduledReportService::class)->updateReport(
             reportId: $this->editingId,
-            userId:   auth()->id(),
-            form:     $this->editForm,
+            userId: auth()->id(),
+            form: $this->editForm,
         );
 
         $this->editingId = null;
@@ -58,7 +59,7 @@ class ScheduledReports extends Component
 
     public function confirmDelete(int $id): void
     {
-        $this->deletingId      = $id;
+        $this->deletingId = $id;
         $this->showDeleteConfirm = true;
     }
 
@@ -70,13 +71,13 @@ class ScheduledReports extends Component
         }
 
         $this->showDeleteConfirm = false;
-        $this->deletingId        = null;
+        $this->deletingId = null;
     }
 
     public function cancelDelete(): void
     {
         $this->showDeleteConfirm = false;
-        $this->deletingId        = null;
+        $this->deletingId = null;
     }
 
     public function toggleActive(int $id): void
@@ -92,7 +93,7 @@ class ScheduledReports extends Component
     }
 
     #[Computed]
-    public function reports(): \Illuminate\Support\Collection
+    public function reports(): Collection
     {
         return app(ScheduledReportService::class)->getForUser(auth()->id());
     }

@@ -128,6 +128,9 @@
                 title="3. Filters"
                 caption="Create grouped conditions with plus and minus actions. Use group logic to build more precise rule matching."
             />
+            @error('form.filters.groups')
+                <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
+            @enderror
 
             <section class="app-card">
                 <div class="app-card-header">

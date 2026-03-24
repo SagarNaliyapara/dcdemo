@@ -8,6 +8,7 @@ use App\Services\NotificationRulePreviewService;
 use App\Services\NotificationRuleService;
 use App\Services\OrderHistoryFilterService;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -118,11 +119,18 @@ class NotificationRuleBuilder extends Component
 
     public function save(): void
     {
+        $originalFilters = $this->form->filters;
+
         $this->form->filters = [
             'groups' => $this->normalizedGroups(),
         ];
 
-        $this->form->validate();
+        try {
+            $this->form->validate();
+        } catch (ValidationException $e) {
+            $this->form->filters = $originalFilters;
+            throw $e;
+        }
 
         if ($this->ruleId !== null) {
             $rule = NotificationRule::query()

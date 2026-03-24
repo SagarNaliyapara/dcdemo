@@ -13,16 +13,16 @@ class ScheduledReportService
     public function createScheduledReport(int $userId, array $filters, ScheduledReportForm $form): ScheduledReport
     {
         return ScheduledReport::create([
-            'user_id'      => $userId,
-            'name'         => $form->name ?: $this->buildAutoName($filters, $form->frequency),
+            'user_id' => $userId,
+            'name' => $form->name ?: $this->buildAutoName($filters, $form->frequency),
             'filters_json' => $filters,
-            'frequency'    => $form->frequency,
-            'send_time'    => $form->sendTime,
-            'day_of_week'  => $form->frequency === 'weekly'  ? (int) $form->dayOfWeek  : null,
+            'frequency' => $form->frequency,
+            'send_time' => $form->sendTime,
+            'day_of_week' => $form->frequency === 'weekly' ? (int) $form->dayOfWeek : null,
             'day_of_month' => $form->frequency === 'monthly' ? (int) $form->dayOfMonth : null,
-            'email'        => $form->email,
-            'is_active'    => true,
-            'next_run_at'  => $this->calculateNextRun($form->frequency, $form->sendTime, $form->dayOfWeek, $form->dayOfMonth),
+            'email' => $form->email,
+            'is_active' => true,
+            'next_run_at' => $this->calculateNextRun($form->frequency, $form->sendTime, $form->dayOfWeek, $form->dayOfMonth),
         ]);
     }
 
@@ -34,13 +34,13 @@ class ScheduledReportService
             ->firstOrFail();
 
         $report->update([
-            'name'         => $form->name ?: $report->name,
-            'frequency'    => $form->frequency,
-            'send_time'    => $form->sendTime,
-            'day_of_week'  => $form->frequency === 'weekly'  ? (int) $form->dayOfWeek  : null,
+            'name' => $form->name ?: $report->name,
+            'frequency' => $form->frequency,
+            'send_time' => $form->sendTime,
+            'day_of_week' => $form->frequency === 'weekly' ? (int) $form->dayOfWeek : null,
             'day_of_month' => $form->frequency === 'monthly' ? (int) $form->dayOfMonth : null,
-            'email'        => $form->email,
-            'next_run_at'  => $this->calculateNextRun($form->frequency, $form->sendTime, $form->dayOfWeek, $form->dayOfMonth),
+            'email' => $form->email,
+            'next_run_at' => $this->calculateNextRun($form->frequency, $form->sendTime, $form->dayOfWeek, $form->dayOfMonth),
         ]);
     }
 
@@ -65,23 +65,23 @@ class ScheduledReportService
         [$hour, $minute] = explode(':', $sendTime);
         $now = Carbon::now();
 
-        return match($frequency) {
-            'weekly'  => $this->nextWeeklyRun($now, (int) $dayOfWeek, (int) $hour, (int) $minute),
+        return match ($frequency) {
+            'weekly' => $this->nextWeeklyRun($now, (int) $dayOfWeek, (int) $hour, (int) $minute),
             'monthly' => $this->nextMonthlyRun($now, (int) $dayOfMonth, (int) $hour, (int) $minute),
-            default   => $this->nextDailyRun($now, (int) $hour, (int) $minute),
+            default => $this->nextDailyRun($now, (int) $hour, (int) $minute),
         };
     }
 
     private function buildAutoName(array $filters, string $frequency): string
     {
-        $dateLabel = match($filters['dateFilter'] ?? 'all') {
-            'today'     => 'Today',
+        $dateLabel = match ($filters['dateFilter'] ?? 'all') {
+            'today' => 'Today',
             'yesterday' => 'Yesterday',
             'last3days' => 'Last 3 Days',
             'last7days' => 'Last 7 Days',
             'thismonth' => 'This Month',
             'lastmonth' => 'Last Month',
-            default     => 'All Orders',
+            default => 'All Orders',
         };
 
         return ucfirst($frequency).' – '.$dateLabel.' Order Report';
@@ -109,7 +109,7 @@ class ScheduledReportService
     private function nextMonthlyRun(Carbon $now, int $dayOfMonth, int $hour, int $minute): Carbon
     {
         $safeDom = min($dayOfMonth, $now->daysInMonth);
-        $next    = $now->copy()->day($safeDom)->setTime($hour, $minute);
+        $next = $now->copy()->day($safeDom)->setTime($hour, $minute);
 
         if ($next->isPast()) {
             $next->addMonth();
