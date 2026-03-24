@@ -12,13 +12,7 @@
 @endphp
 
 <div
-    x-data="{
-        showEditModal: false,
-        showDeleteModal: false,
-        init() {
-            $wire.$on('schedule-edit-saved', () => { this.showEditModal = false })
-        }
-    }"
+    x-data="{}"
     class="app-page"
 >
     @if(session('action'))
@@ -120,8 +114,8 @@
                                 </td>
                                 <td class="px-4 py-4">
                                     <div class="flex flex-wrap gap-2">
-                                        <button type="button" @click="showEditModal = true" wire:click="startEdit({{ $report->id }})" class="app-button px-3 py-2 text-xs">Edit</button>
-                                        <button type="button" @click="showDeleteModal = true" wire:click="confirmDelete({{ $report->id }})" class="app-button app-button-danger px-3 py-2 text-xs">Delete</button>
+                                        <button type="button" wire:click="startEdit({{ $report->id }})" class="app-button px-3 py-2 text-xs">Edit</button>
+                                        <button type="button" wire:click="confirmDelete({{ $report->id }})" class="app-button app-button-danger px-3 py-2 text-xs">Delete</button>
                                     </div>
                                 </td>
                             </tr>
@@ -133,11 +127,11 @@
     </section>
 
     <div
-        x-show="showEditModal && @js($editingId !== null)"
+        x-show="$wire.editingId !== null"
         x-cloak
         class="fixed inset-0 z-50 flex items-center justify-center p-4"
     >
-        <div class="absolute inset-0 bg-slate-950/50 backdrop-blur-sm" @click="showEditModal = false; $wire.cancelEdit()"></div>
+        <div class="absolute inset-0 bg-slate-950/50 backdrop-blur-sm" @click="$wire.cancelEdit()"></div>
         <div class="relative w-full max-w-xl rounded-[28px] border border-slate-200 bg-white shadow-[0_20px_60px_rgba(15,23,42,0.16)]">
             <div class="app-card-header">
                 <div class="flex items-start justify-between gap-4">
@@ -145,7 +139,7 @@
                         <h2 class="text-xl font-semibold text-slate-950">Edit Schedule</h2>
                         <p class="mt-1 text-sm text-slate-500">Adjust timing and recipient while keeping the saved filter scope intact.</p>
                     </div>
-                    <button type="button" @click="showEditModal = false; $wire.cancelEdit()" class="app-button px-3 py-2 text-xs">Close</button>
+                    <button type="button" @click="$wire.cancelEdit()" class="app-button px-3 py-2 text-xs">Close</button>
                 </div>
             </div>
 
@@ -214,25 +208,25 @@
             </div>
 
             <div class="flex justify-end gap-3 border-t border-slate-200 px-5 py-4">
-                <button type="button" @click="showEditModal = false; $wire.cancelEdit()" class="app-button">Cancel</button>
+                <button type="button" @click="$wire.cancelEdit()" class="app-button">Cancel</button>
                 <button type="button" wire:click="saveEdit" class="app-button app-button-primary">Save Changes</button>
             </div>
         </div>
     </div>
 
     <div
-        x-show="showDeleteModal && @js($showDeleteConfirm)"
+        x-show="$wire.showDeleteConfirm"
         x-cloak
         class="fixed inset-0 z-50 flex items-center justify-center p-4"
     >
-        <div class="absolute inset-0 bg-slate-950/50 backdrop-blur-sm" @click="showDeleteModal = false; $wire.cancelDelete()"></div>
+        <div class="absolute inset-0 bg-slate-950/50 backdrop-blur-sm" @click="$wire.cancelDelete()"></div>
         <div class="relative w-full max-w-md rounded-[28px] border border-slate-200 bg-white shadow-[0_20px_60px_rgba(15,23,42,0.16)]">
             <div class="app-card-body">
                 <h2 class="text-xl font-semibold text-slate-950">Delete Schedule</h2>
                 <p class="mt-2 text-sm text-slate-500">This removes the saved report schedule. Filter scope cannot be recovered after deletion.</p>
                 <div class="mt-6 flex justify-end gap-3">
-                    <button type="button" @click="showDeleteModal = false; $wire.cancelDelete()" class="app-button">Cancel</button>
-                    <button type="button" wire:click="deleteReport" @click="showDeleteModal = false" class="app-button app-button-danger">Delete Schedule</button>
+                    <button type="button" wire:click="cancelDelete" class="app-button">Cancel</button>
+                    <button type="button" wire:click="deleteReport" class="app-button app-button-danger">Delete Schedule</button>
                 </div>
             </div>
         </div>

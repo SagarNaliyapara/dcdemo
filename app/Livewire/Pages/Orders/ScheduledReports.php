@@ -47,7 +47,6 @@ class ScheduledReports extends Component
         );
 
         $this->editingId = null;
-        $this->dispatch('schedule-edit-saved');
         session()->flash('action', 'Schedule updated successfully.');
     }
 
