@@ -4,10 +4,16 @@ namespace App\Services;
 
 use App\Models\Order;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
 
 class OrderService
 {
+    public function __construct(
+        private readonly OrderHistoryFilterService $orderHistoryFilterService,
+    ) {}
+
     public function updateOrderFlag(int $orderId, string $flag): void
     {
         Order::where('id', $orderId)->update(['flag' => $flag]);
@@ -23,7 +29,7 @@ class OrderService
         return $this->buildQuery($filters)->paginate($perPage);
     }
 
-    public function getAllOrders(array $filters): \Illuminate\Database\Eloquent\Collection
+    public function getAllOrders(array $filters): Collection
     {
         return $this->buildQuery($filters)->get();
     }
@@ -43,13 +49,24 @@ class OrderService
             ->toArray();
     }
 
-    private function buildQuery(array $filters)
+    private function buildQuery(array $filters): Builder
     {
         $query = Order::query();
 
         $this->applySearch($query, $filters['search'] ?? '');
         $this->applyDateRange($query, $filters['dateFilter'] ?? 'all', $filters['startDate'] ?? '', $filters['endDate'] ?? '');
         $this->applyMinOrderDate($query, $filters['minOrderDate'] ?? null);
+        $this->applyLegacyFilters($query, $filters);
+        $this->applyGroupedFilters($query, $filters['groupedFilters'] ?? []);
+
+        $sortField = $filters['sortField'] ?? 'orderdate';
+        $sortDirection = $filters['sortDirection'] ?? 'desc';
+
+        return $query->orderBy($sortField, $sortDirection);
+    }
+
+    private function applyLegacyFilters(Builder $query, array $filters): void
+    {
         $this->applyStockFilter($query, $filters['stockFilter'] ?? []);
         $this->applyDtCategory($query, $filters['dtCategory'] ?? []);
         $this->applySupplierFilter($query, $filters['supplierFilter'] ?? []);
@@ -57,11 +74,15 @@ class OrderService
         $this->applyCategoryFilter($query, $filters['categoryFilter'] ?? []);
         $this->applyPriceFilters($query, $filters);
         $this->applyAdditionalFilters($query, $filters);
+    }
 
-        $sortField     = $filters['sortField']     ?? 'orderdate';
-        $sortDirection = $filters['sortDirection'] ?? 'desc';
+    private function applyGroupedFilters(Builder $query, array $groupedFilters): void
+    {
+        if (($groupedFilters['groups'] ?? []) === []) {
+            return;
+        }
 
-        return $query->orderBy($sortField, $sortDirection);
+        $this->orderHistoryFilterService->applyOrderFilters($query, $groupedFilters);
     }
 
     private function applyMinOrderDate($query, ?string $minDate): void
@@ -101,13 +122,13 @@ class OrderService
     private function resolveDateRange(string $dateFilter, string $startDate, string $endDate): array
     {
         return match ($dateFilter) {
-            'today'     => [Carbon::now()->startOfDay(), Carbon::now()->endOfDay()],
+            'today' => [Carbon::now()->startOfDay(), Carbon::now()->endOfDay()],
             'yesterday' => [Carbon::now()->subDay()->startOfDay(), Carbon::now()->subDay()->endOfDay()],
             'last3days' => [Carbon::now()->subDays(3)->startOfDay(), Carbon::now()->endOfDay()],
             'last7days' => [Carbon::now()->subDays(7)->startOfDay(), Carbon::now()->endOfDay()],
             'thismonth' => [Carbon::now()->startOfMonth(), Carbon::now()->endOfMonth()],
             'lastmonth' => [Carbon::now()->subMonth()->startOfMonth(), Carbon::now()->subMonth()->endOfMonth()],
-            'custom'    => $startDate && $endDate
+            'custom' => $startDate && $endDate
                 ? [Carbon::parse($startDate)->startOfDay(), Carbon::parse($endDate)->endOfDay()]
                 : [null, null],
             default => [null, null],

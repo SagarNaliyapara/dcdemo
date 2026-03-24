@@ -1,15 +1,15 @@
 @props(['orders', 'sortField', 'sortDirection'])
 
-<div class="relative overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
+<div class="app-card relative overflow-hidden">
 
     {{-- Loading overlay --}}
-    <div wire:loading class="absolute inset-0 z-20 flex items-center justify-center bg-white/60 backdrop-blur-[1px] dark:bg-zinc-900/60">
-        <div class="flex items-center gap-3 rounded-lg bg-white px-5 py-3 shadow-lg dark:bg-zinc-800">
+    <div wire:loading class="absolute inset-0 z-20 flex items-center justify-center bg-white/70 backdrop-blur-[1px]">
+        <div class="flex items-center gap-3 rounded-2xl bg-white px-5 py-3 shadow-lg">
             <svg class="h-5 w-5 animate-spin text-blue-600" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
             </svg>
-            <span class="text-sm font-medium text-zinc-700 dark:text-zinc-200">Loading…</span>
+            <span class="text-sm font-medium text-slate-700">Loading…</span>
         </div>
     </div>
 
@@ -17,7 +17,7 @@
         <table class="min-w-max w-full text-sm">
 
             {{-- ── Sticky header ── --}}
-            <thead class="sticky top-0 z-10 border-b border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800">
+            <thead class="sticky top-0 z-10 border-b border-slate-200 bg-slate-50">
                 <tr>
                     <th class="w-10 px-3 py-3 text-center">
                         <input type="checkbox" @change="$event.target.checked ? $wire.selectAll() : $wire.deselectAll()" class="h-4 w-4 rounded border-zinc-300 text-blue-600 focus:ring-blue-500 dark:border-zinc-600 dark:bg-zinc-700"/>

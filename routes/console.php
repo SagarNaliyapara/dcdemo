@@ -1,5 +1,6 @@
 <?php
 
+use App\Console\Commands\RunNotificationRules;
 use App\Console\Commands\SendScheduledReports;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
@@ -10,3 +11,4 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command(SendScheduledReports::class)->everyThirtyMinutes();
+Schedule::command(RunNotificationRules::class)->everyThirtyMinutes();
