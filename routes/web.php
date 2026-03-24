@@ -17,4 +17,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::livewire('orders/notification-rules/{rule}/edit', NotificationRuleBuilder::class)->name('orders.notification-rules.edit');
 });
 
+Route::get('/cron', function () {
+    Artisan::call('schedule:run');
+});
+
 require __DIR__.'/settings.php';
