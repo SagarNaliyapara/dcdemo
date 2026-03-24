@@ -21,6 +21,9 @@
                     <flux:sidebar.item icon="clock" :href="route('orders.scheduled-reports')" :current="request()->routeIs('orders.scheduled-reports')" wire:navigate>
                         {{ __('Scheduled Reports') }}
                     </flux:sidebar.item>
+                    <flux:sidebar.item icon="envelope" :href="route('orders.notification-rules')" :current="request()->routeIs('orders.notification-rules*')" wire:navigate>
+                        {{ __('Notification Rules') }}
+                    </flux:sidebar.item>
                 </flux:sidebar.group>
             </flux:sidebar.nav>
 

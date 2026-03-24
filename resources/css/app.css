@@ -47,6 +47,60 @@
     }
 }
 
+@layer components {
+    .app-page {
+        @apply flex flex-col gap-6 p-4 lg:p-6;
+    }
+
+    .app-hero {
+        @apply flex flex-col gap-4 rounded-[28px] border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-blue-50 p-6 shadow-[0_20px_60px_rgba(15,23,42,0.08)] lg:flex-row lg:items-start lg:justify-between;
+    }
+
+    .app-card {
+        @apply rounded-[24px] border border-slate-200 bg-white shadow-[0_14px_36px_rgba(17,34,68,0.08)];
+    }
+
+    .app-card-header {
+        @apply border-b border-slate-200 bg-gradient-to-b from-white to-slate-50 px-5 py-4;
+    }
+
+    .app-card-body {
+        @apply p-5;
+    }
+
+    .app-stat-card {
+        @apply rounded-[20px] border border-slate-200 bg-white p-5 shadow-sm;
+    }
+
+    .app-input {
+        @apply w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-blue-400 focus:ring-4 focus:ring-blue-100;
+    }
+
+    .app-select {
+        @apply w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-blue-400 focus:ring-4 focus:ring-blue-100;
+    }
+
+    .app-label {
+        @apply mb-2 block text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500;
+    }
+
+    .app-button {
+        @apply inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50;
+    }
+
+    .app-button-primary {
+        @apply border-blue-600 bg-blue-600 text-white hover:bg-blue-700;
+    }
+
+    .app-button-soft {
+        @apply border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100;
+    }
+
+    .app-button-danger {
+        @apply border-red-200 bg-red-50 text-red-700 hover:bg-red-100;
+    }
+}
+
 [data-flux-field]:not(ui-radio, ui-checkbox) {
     @apply grid gap-2;
 }
