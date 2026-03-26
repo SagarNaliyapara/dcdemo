@@ -39,17 +39,18 @@ RUN mkdir -p /var/www/html/app/tmp \
     && chown -R www-data:www-data /var/www/html \
     && chmod -R 777 /var/www/html/app/tmp
 
-# Apache config for CakePHP
-RUN echo '<VirtualHost *:${PORT}>
-    DocumentRoot /var/www/html/app/webroot
+# Create Apache config for Render
+RUN printf '<VirtualHost *:80>\n\
+    DocumentRoot /var/www/html/app/webroot\n\
+    <Directory /var/www/html/app/webroot>\n\
+        AllowOverride All\n\
+        Require all granted\n\
+    </Directory>\n\
+</VirtualHost>\n' \
+> /etc/apache2/sites-available/000-default.conf
 
-    <Directory /var/www/html/app/webroot>
-        AllowOverride All
-        Require all granted
-    </Directory>
-</VirtualHost>' > /etc/apache2/sites-available/000-default.conf
-
-# Make Apache listen on Render port
+# Make Apache listen on Render port at runtime
+ENV PORT 10000
 RUN sed -i 's/80/${PORT}/g' /etc/apache2/ports.conf
 
 EXPOSE 10000
