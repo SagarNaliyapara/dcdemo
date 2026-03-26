@@ -152,6 +152,92 @@ class NotificationRulesController extends AppController {
         return $this->redirect(array('action' => 'index'));
     }
 
+    public function runNow($id) {
+        $this->request->allowMethod('post');
+        $this->autoRender = false;
+        $this->response->type('json');
+
+        $userId = $this->Auth->user('id');
+        $rule = $this->NotificationRule->find('first', array(
+            'conditions' => array('NotificationRule.id' => (int)$id, 'NotificationRule.user_id' => $userId),
+        ));
+
+        if (!$rule) {
+            $this->response->body(json_encode(array('success' => false, 'message' => 'Rule not found.')));
+            return $this->response;
+        }
+
+        $r = $rule['NotificationRule'];
+
+        if (!empty($r['last_queued_at'])) {
+            $this->response->body(json_encode(array('success' => false, 'message' => 'Rule is already queued.')));
+            return $this->response;
+        }
+
+        require_once APP . 'Lib' . DS . 'Services' . DS . 'NotificationRuleService.php';
+        require_once APP . 'Lib' . DS . 'Services' . DS . 'OrderHistoryFilterService.php';
+        require_once APP . 'Lib' . DS . 'Services' . DS . 'NotificationRulePreviewService.php';
+        App::uses('CakeEmail', 'Network/Email');
+
+        $service = new NotificationRuleService();
+        $previewService = new NotificationRulePreviewService();
+
+        try {
+            $service->markQueued($r['id']);
+
+            $orders = $previewService->matchedOrders($r, $r['email_row_limit'] ?: 300);
+            $matchCount = count($orders);
+
+            if ($matchCount === 0) {
+                $service->markSuccessfulRun($r['id'], 0);
+                $this->response->body(json_encode(array('success' => true, 'message' => 'No matching orders — no email sent.', 'count' => 0)));
+                return $this->response;
+            }
+
+            $emails = array_filter(array_map('trim', explode("\n", !empty($r['emails']) ? $r['emails'] : $r['recipient_email'])));
+            if (empty($emails) && !empty($r['recipient_email'])) {
+                $emails = array(trim($r['recipient_email']));
+            }
+
+            $csvTmp = $this->_generateNotifCsv($orders);
+
+            foreach ($emails as $email) {
+                if (!filter_var($email, FILTER_VALIDATE_EMAIL)) continue;
+                $mailer = new CakeEmail('default');
+                $mailer->template('notification_rule', 'default')
+                       ->emailFormat('html')
+                       ->to($email)
+                       ->subject('🔔 ' . $r['name'] . ' — ' . $matchCount . ' match' . ($matchCount !== 1 ? 'es' : ''))
+                       ->viewVars(array(
+                           'rule'           => $r,
+                           'orders'         => $orders,
+                           'matchCount'     => $matchCount,
+                           'recipientEmail' => $email,
+                       ))
+                       ->attachments(array(
+                           'notification-rule-orders.csv' => array(
+                               'file'     => $csvTmp,
+                               'mimetype' => 'text/csv',
+                           ),
+                       ))
+                       ->send();
+            }
+            @unlink($csvTmp);
+
+            $service->markSuccessfulRun($r['id'], $matchCount);
+            $this->response->body(json_encode(array(
+                'success' => true,
+                'message' => 'Email sent — ' . $matchCount . ' match' . ($matchCount !== 1 ? 'es' : '') . ' found.',
+                'count'   => $matchCount,
+            )));
+        } catch (Exception $e) {
+            $service->markFailed($r['id'], $e->getMessage());
+            $this->response->body(json_encode(array('success' => false, 'message' => 'Error: ' . $e->getMessage())));
+        }
+
+        return $this->response;
+    }
+
     public function previewOrders() {
         $this->request->allowMethod('post');
         $this->autoRender = false;
@@ -367,5 +453,30 @@ class NotificationRulesController extends AppController {
             if ($next <= $now) $next->modify('+1 day');
         }
         return $next->format('Y-m-d H:i:s');
+    }
+
+    private function _generateNotifCsv($orders) {
+        $tmp = tempnam(sys_get_temp_dir(), 'dc_notif_');
+        $fh  = fopen($tmp, 'w');
+        fputcsv($fh, array('Order Number', 'Description', 'Supplier', 'Approved Qty', 'Price', 'DT Price', 'Subtotal', 'Response', 'Order Date'));
+        foreach ($orders as $o) {
+            $approvedQty = (float)(isset($o['approved_qty']) ? $o['approved_qty'] : (isset($o['quantity']) ? $o['quantity'] : 0));
+            $price       = (float)(isset($o['price']) ? $o['price'] : 0);
+            $dtPrice     = isset($o['dt_price']) ? $o['dt_price'] : '';
+            $dateRaw     = isset($o['orderdate']) ? $o['orderdate'] : (isset($o['order_date']) ? $o['order_date'] : '');
+            fputcsv($fh, array(
+                isset($o['order_number']) ? $o['order_number'] : '',
+                isset($o['product_description']) ? $o['product_description'] : '',
+                isset($o['supplier_id']) ? $o['supplier_id'] : '',
+                number_format($approvedQty, 2),
+                number_format($price, 4),
+                $dtPrice !== '' ? number_format((float)$dtPrice, 4) : '',
+                number_format($approvedQty * $price, 2),
+                isset($o['response']) ? $o['response'] : '',
+                $dateRaw ? date('Y-m-d H:i:s', strtotime($dateRaw)) : '',
+            ));
+        }
+        fclose($fh);
+        return $tmp;
     }
 }

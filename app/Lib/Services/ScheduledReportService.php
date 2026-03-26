@@ -2,6 +2,43 @@
 
 class ScheduledReportService {
 
+	public function getDueReports() {
+		App::uses('ClassRegistry', 'Utility');
+		$ScheduledReport = ClassRegistry::init('ScheduledReport');
+		return $ScheduledReport->find('all', array(
+			'conditions' => array(
+				'ScheduledReport.is_active' => 1,
+				'ScheduledReport.next_run_at IS NOT NULL',
+				'ScheduledReport.next_run_at <=' => date('Y-m-d H:i:s'),
+			),
+		));
+	}
+
+	public function markSent($reportId) {
+		App::uses('ClassRegistry', 'Utility');
+		$ScheduledReport = ClassRegistry::init('ScheduledReport');
+		$report = $ScheduledReport->find('first', array('conditions' => array('ScheduledReport.id' => $reportId)));
+		if (!$report) return;
+		$r = $report['ScheduledReport'];
+		$nextRun = $this->calculateNextRun($r['frequency'], $r['send_time'], $r['day_of_week'], $r['day_of_month']);
+		return $ScheduledReport->save(array('ScheduledReport' => array(
+			'id' => $reportId,
+			'next_run_at' => $nextRun,
+			'modified' => date('Y-m-d H:i:s'),
+		)));
+	}
+
+	public function markFailed($reportId) {
+		// Log only — no error column in scheduled_reports table
+		CakeLog::write('error', '[SendScheduledReports] Report ID ' . $reportId . ' failed.');
+	}
+
+	public function getOrdersForReport($filters) {
+		require_once APP . 'Lib' . DS . 'Services' . DS . 'OrderService.php';
+		$orderService = new OrderService();
+		return $orderService->getAllOrders($filters);
+	}
+
 	public function createScheduledReport($userId, $filters, $data) {
 		App::uses('ClassRegistry', 'Utility');
 		$ScheduledReport = ClassRegistry::init('ScheduledReport');

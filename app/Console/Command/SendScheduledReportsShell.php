@@ -7,7 +7,7 @@ App::uses('CakeEmail', 'Network/Email');
  * Shell to process and send due scheduled reports.
  * Run: php app/Console/cake.php send_scheduled_reports
  * Add to cron every 30 minutes:
- *   */30 * * * * cd /path/to/dc-cakephp && php app/Console/cake.php send_scheduled_reports
+ *   30 * * * * cd /path/to/dc-cakephp && php app/Console/cake.php send_scheduled_reports
  */
 class SendScheduledReportsShell extends AppShell {
 
@@ -16,8 +16,9 @@ class SendScheduledReportsShell extends AppShell {
     public function main() {
         $this->out('[SendScheduledReports] Starting at ' . date('Y-m-d H:i:s'));
 
-        App::import('Lib', 'Services/ScheduledReportService');
-        App::import('Lib', 'Services/OrderService');
+        require_once APP . 'Lib' . DS . 'Services' . DS . 'ScheduledReportService.php';
+        require_once APP . 'Lib' . DS . 'Services' . DS . 'OrderHistoryFilterService.php';
+        require_once APP . 'Lib' . DS . 'Services' . DS . 'OrderService.php';
 
         $service = new ScheduledReportService();
         $orderService = new OrderService();
@@ -30,27 +31,24 @@ class SendScheduledReportsShell extends AppShell {
             $this->out('Processing: ' . $report['name']);
 
             try {
-                // Mark as queued
-                $service->markQueued($report['id']);
-
-                // Build filters from filters_json
-                $filters = !empty($report['filters_json']) ? json_decode($report['filters_json'], true) : array();
-
-                // Fetch matching orders
-                $allOrders = $orderService->getOrdersForReport($filters);
+                $filters   = !empty($report['filters_json']) ? json_decode($report['filters_json'], true) : array();
+                $allOrders = $orderService->getAllOrders($filters);
                 $totalCount = count($allOrders);
-                $totalAmount = array_sum(array_column(array_column($allOrders, 'Order'), 'total_amount'));
 
-                // Send to each email
-                $emails = array_filter(array_map('trim', explode("\n", $report['emails'])));
-                foreach ($emails as $email) {
-                    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) continue;
+                // Compute total amount from actual DB fields: approved_qty * price
+                $totalAmount = array_sum(array_map(function($o) {
+                    $qty   = (float)(isset($o['approved_qty']) ? $o['approved_qty'] : (isset($o['quantity']) ? $o['quantity'] : 0));
+                    $price = (float)(isset($o['price']) ? $o['price'] : 0);
+                    return $qty * $price;
+                }, $allOrders));
+
+                $email = trim($report['email']);
+                if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
                     $this->_sendReportEmail($email, $report, $allOrders, $totalCount, $totalAmount);
                 }
 
-                // Mark sent and update next_run_at
                 $service->markSent($report['id']);
-                $this->out('  ✓ Sent to ' . count($emails) . ' recipient(s). Orders: ' . $totalCount);
+                $this->out('  ✓ Sent to ' . $email . '. Orders: ' . $totalCount);
             } catch (Exception $e) {
                 $service->markFailed($report['id']);
                 $this->out('  ✗ Error: ' . $e->getMessage());
@@ -60,18 +58,53 @@ class SendScheduledReportsShell extends AppShell {
         $this->out('[SendScheduledReports] Done.');
     }
 
+    protected function _generateCsv($orders) {
+        $tmp = tempnam(sys_get_temp_dir(), 'dc_report_');
+        $fh  = fopen($tmp, 'w');
+        fputcsv($fh, array('Order Number', 'Description', 'Supplier', 'Approved Qty', 'Price', 'DT Price', 'Subtotal', 'Status', 'Order Date'));
+        foreach ($orders as $o) {
+            $approvedQty = (float)(isset($o['approved_qty']) ? $o['approved_qty'] : (isset($o['quantity']) ? $o['quantity'] : 0));
+            $price       = (float)(isset($o['price']) ? $o['price'] : 0);
+            $dtPrice     = isset($o['dt_price']) ? $o['dt_price'] : '';
+            $dateRaw     = isset($o['orderdate']) ? $o['orderdate'] : '';
+            fputcsv($fh, array(
+                isset($o['order_number']) ? $o['order_number'] : '',
+                isset($o['product_description']) ? $o['product_description'] : '',
+                isset($o['supplier_id']) ? $o['supplier_id'] : '',
+                number_format($approvedQty, 2),
+                number_format($price, 4),
+                $dtPrice !== '' ? number_format((float)$dtPrice, 4) : '',
+                number_format($approvedQty * $price, 2),
+                isset($o['response']) ? $o['response'] : '',
+                $dateRaw ? date('Y-m-d H:i:s', strtotime($dateRaw)) : '',
+            ));
+        }
+        fclose($fh);
+        return $tmp;
+    }
+
     protected function _sendReportEmail($email, $report, $orders, $totalCount, $totalAmount) {
+        $csvTmp = $this->_generateCsv($orders);
         $mailer = new CakeEmail('default');
         $mailer->template('scheduled_report', 'default')
                ->emailFormat('html')
                ->to($email)
-               ->subject('📊 ' . $report['name'] . ' — ' . date('M j, Y'))
+               ->subject('📊 ' . $report['name'] . ' — ' . date('j M Y'))
                ->viewVars(array(
-                   'report'      => $report,
-                   'orders'      => $orders,
-                   'totalCount'  => $totalCount,
-                   'totalAmount' => $totalAmount,
+                   'report'         => $report,
+                   'orders'         => $orders,
+                   'totalCount'     => $totalCount,
+                   'totalAmount'    => $totalAmount,
+                   'recipientEmail' => $email,
+               ))
+               ->attachments(array(
+                   'scheduled-report-orders.csv' => array(
+                       'file'     => $csvTmp,
+                       'mimetype' => 'text/csv',
+                   ),
                ))
                ->send();
+        @unlink($csvTmp);
     }
 }
+

@@ -16,11 +16,12 @@ class NotificationRulePreviewService {
 		$query = $this->buildQuery($data);
 		$countSql = 'SELECT COUNT(*) as total FROM orders WHERE approved_qty > 0' . ($query['where'] ? ' AND ' . $query['where'] : '');
 		$countRow = $this->db->fetchAll($countSql, $query['params']);
-		$matchCount = isset($countRow[0][0]['total']) ? (int)$countRow[0][0]['total'] : 0;
+		$countFirst = !empty($countRow[0]) ? self::extractRow($countRow[0]) : array();
+		$matchCount = isset($countFirst['total']) ? (int)$countFirst['total'] : 0;
 
 		$sql = 'SELECT * FROM orders WHERE approved_qty > 0' . ($query['where'] ? ' AND ' . $query['where'] : '') . ' ORDER BY orderdate DESC LIMIT ' . (int)$limit;
 		$rows = $this->db->fetchAll($sql, $query['params']);
-		$rows = array_map(function($r) { return isset($r[0]) ? $r[0] : $r; }, $rows);
+		$rows = array_map(function($r) { return self::extractRow($r); }, $rows);
 
 		return array(
 			'match_count' => $matchCount,
@@ -41,7 +42,17 @@ class NotificationRulePreviewService {
 		$sql = 'SELECT * FROM orders WHERE approved_qty > 0' . ($query['where'] ? ' AND ' . $query['where'] : '') . ' ORDER BY orderdate DESC';
 		if ($limit !== null) $sql .= ' LIMIT ' . (int)$limit;
 		$rows = $this->db->fetchAll($sql, $query['params']);
-		return array_map(function($r) { return isset($r[0]) ? $r[0] : $r; }, $rows);
+		return array_map(function($r) { return self::extractRow($r); }, $rows);
+	}
+
+	/**
+	 * CakePHP 2.x fetchAll returns rows keyed by table name: ['orders' => ['col' => 'val', ...]]
+	 * This helper flattens it to just ['col' => 'val', ...]
+	 */
+	public static function extractRow($r) {
+		if (isset($r[0]) && is_array($r[0])) return $r[0];
+		$first = reset($r);
+		return is_array($first) ? $first : $r;
 	}
 
 	private function buildQuery($data) {

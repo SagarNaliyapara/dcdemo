@@ -32,10 +32,11 @@ class OrderService {
 
 		$rows = $this->db->fetchAll($sql, $params);
 		$countRow = $this->db->fetchAll($countSql, $params);
-		$total = isset($countRow[0][0]['total']) ? (int)$countRow[0][0]['total'] : 0;
+		$countFirst = !empty($countRow[0]) ? self::extractRow($countRow[0]) : array();
+		$total = isset($countFirst['total']) ? (int)$countFirst['total'] : 0;
 
 		return array(
-			'data' => array_map(function($r) { return isset($r[0]) ? $r[0] : $r; }, $rows),
+			'data' => array_map(function($r) { return self::extractRow($r); }, $rows),
 			'total' => $total,
 			'perPage' => $perPage,
 			'page' => $page,
@@ -46,16 +47,27 @@ class OrderService {
 	public function getTotalAmount($filters) {
 		$where = $this->buildWhereSql($filters);
 		$params = $this->buildParams($filters);
-		$sql = 'SELECT COALESCE(SUM(quantity * price), 0) as total FROM orders' . ($where ? ' WHERE ' . $where : '');
+		$sql = 'SELECT COALESCE(SUM(approved_qty * price), 0) as total FROM orders' . ($where ? ' WHERE ' . $where : '');
 		$result = $this->db->fetchAll($sql, $params);
-		return isset($result[0][0]['total']) ? (float)$result[0][0]['total'] : 0.0;
+		$first = !empty($result[0]) ? self::extractRow($result[0]) : array();
+		return isset($first['total']) ? (float)$first['total'] : 0.0;
 	}
 
 	public function getAllOrders($filters) {
 		$sql = $this->buildSelectSql($filters);
 		$params = $this->buildParams($filters);
 		$rows = $this->db->fetchAll($sql, $params);
-		return array_map(function($r) { return isset($r[0]) ? $r[0] : $r; }, $rows);
+		return array_map(function($r) { return self::extractRow($r); }, $rows);
+	}
+
+	/**
+	 * CakePHP 2.x fetchAll returns rows keyed by table name: ['orders' => ['col' => 'val', ...]]
+	 * This helper flattens it to just ['col' => 'val', ...]
+	 */
+	public static function extractRow($r) {
+		if (isset($r[0]) && is_array($r[0])) return $r[0];
+		$first = reset($r);
+		return is_array($first) ? $first : $r;
 	}
 
 	private function buildSelectSql($filters) {

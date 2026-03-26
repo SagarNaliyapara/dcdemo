@@ -3,7 +3,7 @@ class EmailConfig {
     public $default = array(
         'transport'  => 'Smtp',
         'from'       => array('hello@example.com' => 'DC Orders'),
-        'host'       => 'sandbox.smtp.mailtrap.io',
+        'host'       => '',
         'port'       => 2525,
         'username'   => '',
         'password'   => '',

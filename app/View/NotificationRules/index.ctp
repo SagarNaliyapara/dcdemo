@@ -120,6 +120,13 @@
                                 <?php echo $this->Form->submit('Copy', array('class' => 'app-button app-button-sm', 'div' => false)); ?>
                                 <?php echo $this->Form->end(); ?>
 
+                                <button type="button"
+                                    class="app-button app-button-sm app-button-soft run-now-btn"
+                                    data-id="<?php echo $r['id']; ?>"
+                                    data-url="<?php echo Router::url(array('action' => 'runNow', $r['id'])); ?>">
+                                    ▶ Run
+                                </button>
+
                                 <?php echo $this->Form->create(null, array('url' => array('action' => 'delete', $r['id']), 'style' => 'display:inline')); ?>
                                 <?php echo $this->Form->submit('Delete', array(
                                     'class' => 'app-button app-button-sm app-button-danger',
@@ -137,3 +144,56 @@
         <?php endif; ?>
     </section>
 </div>
+
+<!-- Run Now toast -->
+<div id="run-toast" style="display:none;position:fixed;bottom:1.5rem;right:1.5rem;z-index:9999;min-width:260px;max-width:380px;padding:0.875rem 1.25rem;border-radius:0.5rem;font-size:0.875rem;font-weight:500;box-shadow:0 4px 16px rgba(0,0,0,0.12);transition:opacity 0.3s;"></div>
+
+<script>
+(function () {
+    var toast = document.getElementById('run-toast');
+
+    function showToast(msg, success) {
+        toast.textContent = msg;
+        toast.style.background = success ? '#f0fdf4' : '#fef2f2';
+        toast.style.color      = success ? '#166534' : '#991b1b';
+        toast.style.border     = '1px solid ' + (success ? '#bbf7d0' : '#fecaca');
+        toast.style.display    = 'block';
+        toast.style.opacity    = '1';
+        clearTimeout(toast._t);
+        toast._t = setTimeout(function () {
+            toast.style.opacity = '0';
+            setTimeout(function () { toast.style.display = 'none'; }, 300);
+        }, 4000);
+    }
+
+    document.addEventListener('click', function (e) {
+        var btn = e.target.closest('.run-now-btn');
+        if (!btn) return;
+
+        var url  = btn.dataset.url;
+        var orig = btn.textContent;
+        btn.disabled    = true;
+        btn.textContent = 'Running…';
+
+        fetch(url, {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            showToast((data.success ? '✓ ' : '✗ ') + data.message, data.success);
+            if (data.success) {
+                setTimeout(function () { window.location.reload(); }, 1500);
+            }
+        })
+        .catch(function () {
+            showToast('✗ Request failed. Please try again.', false);
+        })
+        .finally(function () {
+            btn.disabled    = false;
+            btn.textContent = orig;
+        });
+    });
+}());
+</script>

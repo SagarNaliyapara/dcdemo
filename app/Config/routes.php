@@ -31,5 +31,8 @@ Router::connect('/notification-rules/:id/toggle-status',
 Router::connect('/notification-rules/:id/duplicate',
     array('controller' => 'notification_rules', 'action' => 'duplicate'),
     array('pass' => array('id'), 'id' => '[0-9]+'));
+Router::connect('/notification-rules/:id/run',
+    array('controller' => 'notification_rules', 'action' => 'runNow'),
+    array('pass' => array('id'), 'id' => '[0-9]+'));
 
 require CAKE . 'Config' . DS . 'routes.php';

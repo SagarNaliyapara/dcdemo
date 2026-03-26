@@ -182,12 +182,12 @@ class NotificationRuleService {
 		$NotificationRule = ClassRegistry::init('NotificationRule');
 		return $NotificationRule->find('all', array(
 			'conditions' => array(
-				'status' => 'active',
-				'next_run_at IS NOT NULL' => true,
-				'next_run_at <=' => date('Y-m-d H:i:s'),
+				'NotificationRule.status' => 'active',
+				'NotificationRule.next_run_at IS NOT NULL',
+				'NotificationRule.next_run_at <=' => date('Y-m-d H:i:s'),
 				'OR' => array(
-					'last_queued_at IS NULL' => true,
-					'last_queued_at < next_run_at' => true,
+					'NotificationRule.last_queued_at IS NULL',
+					'NotificationRule.last_queued_at < NotificationRule.next_run_at',
 				),
 			),
 		));
