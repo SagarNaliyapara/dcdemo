@@ -1,0 +1,3 @@
+name: dc-cakephp
+php: '8.4'
+secured: false
