@@ -241,6 +241,11 @@
 	Configure::write('Security.cipherSeed', '34829104756238194075621983046');
 
 /**
+ * Use OpenSSL for AES-256 encryption. Required for PHP 7.2+ (mcrypt removed).
+ */
+	Configure::write('Security.useOpenSsl', true);
+
+/**
  * Apply timestamps with the last modified time to static assets (js, css, images).
  * Will append a query string parameter containing the time the file was modified. This is
  * useful for invalidating browser caches.

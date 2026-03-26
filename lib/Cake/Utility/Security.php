@@ -184,12 +184,9 @@ class Security {
 		if (function_exists('openssl_random_pseudo_bytes')) {
 			return openssl_random_pseudo_bytes($length);
 		}
-		if (function_exists('mcrypt_create_iv')) {
-			return mcrypt_create_iv($length, MCRYPT_DEV_URANDOM);
-		}
 		trigger_error(
 			'You do not have a safe source of random data available. ' .
-			'Install either the openssl extension, the mcrypt extension, or paragonie/random_compat. ' .
+			'Install the openssl extension. ' .
 			'Falling back to an insecure random source.',
 			E_USER_WARNING
 		);
@@ -263,24 +260,24 @@ class Security {
 			trigger_error(__d('cake_dev', 'You must use a key larger than 32 bytes for Security::rijndael()'), E_USER_WARNING);
 			return '';
 		}
-		$algorithm = MCRYPT_RIJNDAEL_256;
-		$mode = MCRYPT_MODE_CBC;
-		$ivSize = mcrypt_get_iv_size($algorithm, $mode);
 
+		$method = 'AES-256-CBC';
 		$cryptKey = substr($key, 0, 32);
+		$ivSize = openssl_cipher_iv_length($method);
 
 		if ($operation === 'encrypt') {
-			$iv = mcrypt_create_iv($ivSize, MCRYPT_RAND);
-			return $iv . '$$' . mcrypt_encrypt($algorithm, $cryptKey, $text, $mode, $iv);
+			$iv = openssl_random_pseudo_bytes($ivSize);
+			$cipher = openssl_encrypt($text, $method, $cryptKey, OPENSSL_RAW_DATA, $iv);
+			return $iv . '$$' . $cipher;
 		}
-		// Backwards compatible decrypt with fixed iv
+		// Backwards compatible decrypt: check for iv separator
 		if (substr($text, $ivSize, 2) !== '$$') {
-			$iv = substr($key, strlen($key) - 32, 32);
-			return rtrim(mcrypt_decrypt($algorithm, $cryptKey, $text, $mode, $iv), "\0");
+			// Legacy data encrypted with fixed iv (old mcrypt format, cannot decrypt)
+			return '';
 		}
 		$iv = substr($text, 0, $ivSize);
 		$text = substr($text, $ivSize + 2);
-		return rtrim(mcrypt_decrypt($algorithm, $cryptKey, $text, $mode, $iv), "\0");
+		return rtrim(openssl_decrypt($text, $method, $cryptKey, OPENSSL_RAW_DATA, $iv), "\0");
 	}
 
 /**
@@ -352,23 +349,13 @@ class Security {
 		// Generate the encryption and hmac key.
 		$key = substr(hash('sha256', $key . $hmacSalt), 0, 32);
 
-		if (Configure::read('Security.useOpenSsl')) {
-			$method = 'AES-256-CBC';
-			$ivSize = openssl_cipher_iv_length($method);
-			$iv = openssl_random_pseudo_bytes($ivSize);
-			$padLength = (int)ceil((strlen($plain) ?: 1) / $ivSize) * $ivSize;
-			$ciphertext = openssl_encrypt(str_pad($plain, $padLength, "\0"), $method, $key, true, $iv);
-			// Remove the PKCS#7 padding block for compatibility with mcrypt.
-			// Since we have padded the provided data with \0, the final block contains only padded bytes.
-			// So it can be removed safely.
-			$ciphertext = $iv . substr($ciphertext, 0, -$ivSize);
-		} else {
-			$algorithm = MCRYPT_RIJNDAEL_128;
-			$mode = MCRYPT_MODE_CBC;
-			$ivSize = mcrypt_get_iv_size($algorithm, $mode);
-			$iv = mcrypt_create_iv($ivSize, MCRYPT_DEV_URANDOM);
-			$ciphertext = $iv . mcrypt_encrypt($algorithm, $key, $plain, $mode, $iv);
-		}
+		$method = 'AES-256-CBC';
+		$ivSize = openssl_cipher_iv_length($method);
+		$iv = openssl_random_pseudo_bytes($ivSize);
+		$padLength = (int)ceil((strlen($plain) ?: 1) / $ivSize) * $ivSize;
+		$ciphertext = openssl_encrypt(str_pad($plain, $padLength, "\0"), $method, $key, OPENSSL_RAW_DATA, $iv);
+		// Remove the PKCS#7 padding block so trailing nulls are stripped on decrypt.
+		$ciphertext = $iv . substr($ciphertext, 0, -$ivSize);
 
 		$hmac = hash_hmac('sha256', $ciphertext, $key);
 		return $hmac . $ciphertext;
@@ -419,22 +406,13 @@ class Security {
 			return false;
 		}
 
-		if (Configure::read('Security.useOpenSsl')) {
-			$method = 'AES-256-CBC';
-			$ivSize = openssl_cipher_iv_length($method);
-			$iv = substr($cipher, 0, $ivSize);
-			$cipher = substr($cipher, $ivSize);
-			// Regenerate PKCS#7 padding block
-			$padding = openssl_encrypt('', $method, $key, true, substr($cipher, -$ivSize));
-			$plain = openssl_decrypt($cipher . $padding, $method, $key, true, $iv);
-		} else {
-			$algorithm = MCRYPT_RIJNDAEL_128;
-			$mode = MCRYPT_MODE_CBC;
-			$ivSize = mcrypt_get_iv_size($algorithm, $mode);
-			$iv = substr($cipher, 0, $ivSize);
-			$cipher = substr($cipher, $ivSize);
-			$plain = mcrypt_decrypt($algorithm, $key, $cipher, $mode, $iv);
-		}
+		$method = 'AES-256-CBC';
+		$ivSize = openssl_cipher_iv_length($method);
+		$iv = substr($cipher, 0, $ivSize);
+		$cipher = substr($cipher, $ivSize);
+		// Regenerate PKCS#7 padding block
+		$padding = openssl_encrypt('', $method, $key, OPENSSL_RAW_DATA, substr($cipher, -$ivSize));
+		$plain = openssl_decrypt($cipher . $padding, $method, $key, OPENSSL_RAW_DATA, $iv);
 
 		return rtrim($plain, "\0");
 	}

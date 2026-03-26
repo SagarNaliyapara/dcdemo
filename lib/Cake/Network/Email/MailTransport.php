@@ -63,19 +63,13 @@ class MailTransport extends AbstractTransport {
  * @param string $subject email's subject
  * @param string $message email's body
  * @param string $headers email's custom headers
- * @param string $params additional params for sending email, will be ignored when in safe_mode
+ * @param string $params additional params for sending email
  * @throws SocketException if mail could not be sent
  * @return void
  */
 	protected function _mail($to, $subject, $message, $headers, $params = null) {
-		if (ini_get('safe_mode')) {
-			//@codingStandardsIgnoreStart
-			if (!@mail($to, $subject, $message, $headers)) {
-				$error = error_get_last();
-				$msg = 'Could not send email: ' . (isset($error['message']) ? $error['message'] : 'unknown');
-				throw new SocketException($msg);
-			}
-		} elseif (!@mail($to, $subject, $message, $headers, $params)) {
+		//@codingStandardsIgnoreStart
+		if (!@mail($to, $subject, $message, $headers, $params)) {
 			$error = error_get_last();
 			$msg = 'Could not send email: ' . (isset($error['message']) ? $error['message'] : 'unknown');
 			//@codingStandardsIgnoreEnd
