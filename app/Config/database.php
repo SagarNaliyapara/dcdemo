@@ -14,6 +14,6 @@ class DATABASE_CONFIG {
         'flags' => MYSQLI_CLIENT_SSL,
         'ssl_key' => null,
         'ssl_cert' => null,
-        'ssl_ca' => '/path/to/ca.pem', // Aiven CA certificate
+        'ssl_ca' => APP . 'Config/ca.pem',
     );
 }
