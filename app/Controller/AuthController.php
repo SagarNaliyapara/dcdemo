@@ -11,7 +11,7 @@ class AuthController extends AppController {
 
     public function login() {
         if ($this->Auth->user()) {
-            return $this->redirect(array('controller' => 'dashboard', 'action' => 'index'));
+            return $this->redirect(array('controller' => 'dashboard_reports', 'action' => 'index'));
         }
         if ($this->request->is('post')) {
             if ($this->Auth->login()) {

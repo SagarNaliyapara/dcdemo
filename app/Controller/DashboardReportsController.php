@@ -1,7 +1,7 @@
 <?php
 App::uses('AppController', 'Controller');
 
-class DashboardController extends AppController {
+class DashboardReportsController extends AppController {
     public $uses = array('Order');
 
     public function index() {

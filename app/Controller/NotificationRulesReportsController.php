@@ -1,7 +1,7 @@
 <?php
 App::uses('AppController', 'Controller');
 
-class NotificationRulesController extends AppController {
+class NotificationRulesReportsController extends AppController {
     public $uses = array('NotificationRule', 'Order');
     public $components = array('Paginator', 'Session', 'Auth', 'Flash');
 

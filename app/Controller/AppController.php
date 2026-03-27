@@ -5,7 +5,7 @@ class AppController extends Controller {
     public $components = array(
         'Session',
         'Auth' => array(
-            'loginRedirect' => array('controller' => 'dashboard', 'action' => 'index'),
+            'loginRedirect' => array('controller' => 'dashboard_reports', 'action' => 'index'),
             'logoutRedirect' => array('controller' => 'auth', 'action' => 'login'),
             'loginAction' => array('controller' => 'auth', 'action' => 'login'),
             'authenticate' => array(
@@ -26,7 +26,7 @@ class AppController extends Controller {
     public function beforeFilter() {
         parent::beforeFilter();
         $this->Auth->loginAction = array('controller' => 'auth', 'action' => 'login');
-        $this->Auth->loginRedirect = array('controller' => 'dashboard', 'action' => 'index');
+        $this->Auth->loginRedirect = array('controller' => 'dashboard_reports', 'action' => 'index');
         $this->Auth->logoutRedirect = array('controller' => 'auth', 'action' => 'login');
     }
 

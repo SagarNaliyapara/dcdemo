@@ -1,7 +1,7 @@
 <?php
 App::uses('AppController', 'Controller');
 
-class OrdersController extends AppController {
+class OrdersReportsController extends AppController {
     public $uses = array('Order', 'ScheduledReport');
     public $components = array('Paginator', 'RequestHandler', 'Session', 'Auth', 'Flash');
 
