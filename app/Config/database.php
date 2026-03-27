@@ -1,31 +1,21 @@
 <?php
-class DATABASE_CONFIG {
+// Precompute environment variables BEFORE the class
+$dbHost = getenv('DB_HOST') ?: 'localhost';
+$dbUser = getenv('DB_USER') ?: 'root';
+$dbPass = getenv('DB_PASS') ?: '';
+$dbName = getenv('DB_NAME') ?: 'cakephp';
+$dbPort = getenv('DB_PORT') ?: 3306;
 
-    // Initialize with safe constants only
+class DATABASE_CONFIG {
     public $default = array(
         'datasource' => 'Database/Mysql',
         'persistent' => false,
-        'host' => 'localhost',
-        'login' => 'root',
-        'password' => '',
-        'database' => 'cakephp',
-        'port' => 3306,
+        'host' => $dbHost,
+        'login' => $dbUser,
+        'password' => $dbPass,
+        'database' => $dbName,
+        'port' => $dbPort,
         'prefix' => '',
         'encoding' => 'utf8',
     );
-
-    // Apply environment variables safely
-    public function __construct() {
-        $host = getenv('DB_HOST');
-        $login = getenv('DB_USER');
-        $pass = getenv('DB_PASS');
-        $db   = getenv('DB_NAME');
-        $port = getenv('DB_PORT');
-
-        $this->default['host'] = $host !== false ? $host : $this->default['host'];
-        $this->default['login'] = $login !== false ? $login : $this->default['login'];
-        $this->default['password'] = $pass !== false ? $pass : $this->default['password'];
-        $this->default['database'] = $db !== false ? $db : $this->default['database'];
-        $this->default['port'] = $port !== false ? $port : $this->default['port'];
-    }
 }
