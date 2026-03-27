@@ -1,4 +1,6 @@
 <?php
+echo file_exists(APP . 'Model/Datasource/Database/Mysqli.php') ? 'FILE EXISTS' : 'FILE MISSING';
+exit;
 /**
  * The Front Controller for handling every request
  *
