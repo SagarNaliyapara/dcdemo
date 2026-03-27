@@ -1,21 +1,23 @@
 <?php
-// Precompute environment variables BEFORE the class
-$dbHost = getenv('DB_HOST') ?: 'localhost';
-$dbUser = getenv('DB_USER') ?: 'root';
-$dbPass = getenv('DB_PASS') ?: '';
-$dbName = getenv('DB_NAME') ?: 'cakephp';
-$dbPort = getenv('DB_PORT') ?: 3306;
-
 class DATABASE_CONFIG {
+
     public $default = array(
         'datasource' => 'Database/Mysql',
         'persistent' => false,
-        'host' => $dbHost,
-        'login' => $dbUser,
-        'password' => $dbPass,
-        'database' => $dbName,
-        'port' => $dbPort,
+        'host' => '',
+        'login' => '',
+        'password' => '',
+        'database' => '',
+        'port' => 3306, // default fallback
         'prefix' => '',
         'encoding' => 'utf8',
     );
+
+    public function __construct() {
+        $this->default['host'] = getenv('DB_HOST');
+        $this->default['login'] = getenv('DB_USER');
+        $this->default['password'] = getenv('DB_PASS');
+        $this->default['database'] = getenv('DB_NAME');
+        $this->default['port'] = getenv('DB_PORT') !== false ? getenv('DB_PORT') : 3306;
+    }
 }
