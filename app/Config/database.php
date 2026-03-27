@@ -1,16 +1,14 @@
 <?php
 class DATABASE_CONFIG {
-
     public $default = array(
-        'datasource' => 'Database/Mysqli',
+        'datasource' => 'Database/Mysql', // old CakePHP driver
         'persistent' => false,
-        'host' => 'mysql-1791f388-sagarnaliyapara78-b2bb.e.aivencloud.com',
-        'login' => 'avnadmin',
-        'password' => 'AVNS_jOpfMZL8w9gkiKM7MYB',
+        'host' => 'mysql-1791f388-xx-xx.e.aivencloud.com',
+        'login' => 'avnlegacy',
+        'password' => 'xxx',
         'database' => 'defaultdb',
-        'port' => '24659', // default fallback
+        'port' => 24663,
         'prefix' => '',
         'encoding' => 'utf8',
-		'flags' => [MYSQLI_CLIENT_SSL], // optional if SSL required
     );
 }
