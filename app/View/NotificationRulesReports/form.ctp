@@ -1,8 +1,8 @@
 <?php
 $ruleId = isset($rule['id']) ? $rule['id'] : null;
 $formUrl = $isEdit
-    ? array('action' => 'edit', $ruleId)
-    : array('action' => 'create');
+    ? '/notification-rules/' . $ruleId . '/edit'
+    : '/notification-rules/create';
 
 $savedFilters = json_decode($rule['filters_json'] ?? '{}', true) ?: array();
 $groupedFiltersJson = json_encode(!empty($savedFilters['groups']) ? $savedFilters : array('match_type' => 'all', 'groups' => array()));
@@ -63,7 +63,7 @@ function notificationRuleFormData() {
             fd.set('match_type', this.groupedFilters.match_type || 'all');
             fd.set('date_scope_type', this.dateScopeType);
             const params = new URLSearchParams(fd);
-            fetch('<?php echo Router::url(array('controller' => 'notification_rules', 'action' => 'previewOrders')); ?>', {
+            fetch('/notification-rules/preview-orders', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'XMLHttpRequest'},
                 body: params.toString()
@@ -90,7 +90,7 @@ function notificationRuleFormData() {
             </p>
         </div>
         <div class="flex flex-wrap gap-3">
-            <a href="<?php echo Router::url(array('controller' => 'notification_rules', 'action' => 'index')); ?>" class="app-button">← Back to Rules</a>
+            <a href="/notification-rules" class="app-button">← Back to Rules</a>
         </div>
     </section>
 
@@ -319,7 +319,7 @@ function notificationRuleFormData() {
 
             <!-- Submit -->
             <div class="flex justify-end gap-3">
-                <a href="<?php echo Router::url(array('controller' => 'notification_rules', 'action' => 'index')); ?>" class="app-button">Cancel</a>
+                <a href="/notification-rules" class="app-button">Cancel</a>
                 <button type="submit" class="app-button app-button-primary"
                         onclick="document.getElementById('filters-json-input').value = JSON.stringify(Alpine.store ? window._alpine_gf() : {})">
                     <?php echo $isEdit ? 'Update Rule' : 'Create Rule'; ?>

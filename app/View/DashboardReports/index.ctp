@@ -8,10 +8,10 @@
             </p>
         </div>
         <div class="flex flex-wrap gap-3">
-            <a href="<?php echo Router::url(array('controller' => 'orders', 'action' => 'history')); ?>" class="app-button app-button-primary">
+            <a href="<?php echo Router::url(array('controller' => 'orders_reports', 'action' => 'history')); ?>" class="app-button app-button-primary">
                 View Order History
             </a>
-            <a href="<?php echo Router::url(array('controller' => 'notification_rules', 'action' => 'index')); ?>" class="app-button">
+            <a href="<?php echo Router::url(array('controller' => 'notification_rules_reports', 'action' => 'index')); ?>" class="app-button">
                 Notification Rules
             </a>
         </div>
@@ -45,7 +45,7 @@
     <section class="app-card">
         <div class="app-card-header flex items-center justify-between">
             <h2 class="text-base font-semibold text-slate-900">Recent Orders</h2>
-            <a href="<?php echo Router::url(array('controller' => 'orders', 'action' => 'history')); ?>" class="text-sm text-blue-600 font-medium hover:underline">View all →</a>
+            <a href="<?php echo Router::url(array('controller' => 'orders_reports', 'action' => 'history')); ?>" class="text-sm text-blue-600 font-medium hover:underline">View all →</a>
         </div>
         <div class="overflow-x-auto">
             <table class="app-table">
@@ -97,7 +97,7 @@
 
     <!-- Quick Links -->
     <div class="grid gap-4 md:grid-cols-3">
-        <a href="<?php echo Router::url(array('controller' => 'orders', 'action' => 'history')); ?>" class="app-card p-6 hover:shadow-lg transition-shadow group">
+        <a href="<?php echo Router::url(array('controller' => 'orders_reports', 'action' => 'history')); ?>" class="app-card p-6 hover:shadow-lg transition-shadow group">
             <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center mb-4 group-hover:bg-blue-100 transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
@@ -106,7 +106,7 @@
             <h3 class="font-semibold text-slate-900 mb-1">Order History</h3>
             <p class="text-sm text-slate-500">Search, filter and manage all pharmacy orders</p>
         </a>
-        <a href="<?php echo Router::url(array('controller' => 'orders', 'action' => 'scheduledReports')); ?>" class="app-card p-6 hover:shadow-lg transition-shadow group">
+        <a href="<?php echo Router::url(array('controller' => 'orders_reports', 'action' => 'scheduledReports')); ?>" class="app-card p-6 hover:shadow-lg transition-shadow group">
             <div class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center mb-4 group-hover:bg-emerald-100 transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -115,7 +115,7 @@
             <h3 class="font-semibold text-slate-900 mb-1">Scheduled Reports</h3>
             <p class="text-sm text-slate-500">Set up automated email reports on a schedule</p>
         </a>
-        <a href="<?php echo Router::url(array('controller' => 'notification_rules', 'action' => 'index')); ?>" class="app-card p-6 hover:shadow-lg transition-shadow group">
+        <a href="<?php echo Router::url(array('controller' => 'notification_rules_reports', 'action' => 'index')); ?>" class="app-card p-6 hover:shadow-lg transition-shadow group">
             <div class="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center mb-4 group-hover:bg-purple-100 transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>

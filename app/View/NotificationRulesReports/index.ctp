@@ -12,10 +12,10 @@
             </p>
         </div>
         <div class="flex flex-wrap gap-3">
-            <a href="<?php echo Router::url(array('controller' => 'notification_rules', 'action' => 'create')); ?>" class="app-button app-button-primary">
+            <a href="/notification-rules/create" class="app-button app-button-primary">
                 + Create Rule
             </a>
-            <a href="<?php echo Router::url(array('controller' => 'orders', 'action' => 'history')); ?>" class="app-button">
+            <a href="/orders/history" class="app-button">
                 Order History
             </a>
         </div>
@@ -24,7 +24,7 @@
     <!-- Filters -->
     <section class="app-card">
         <div class="app-card-body">
-            <form method="get" action="<?php echo Router::url(array('action' => 'index')); ?>" class="grid gap-3 md:grid-cols-4">
+            <form method="get" action="/notification-rules" class="grid gap-3 md:grid-cols-4">
                 <div class="relative md:col-span-2">
                     <svg class="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"/>
@@ -57,7 +57,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
             </svg>
             <p class="text-slate-400 font-medium">No notification rules found</p>
-            <a href="<?php echo Router::url(array('controller' => 'notification_rules', 'action' => 'create')); ?>" class="app-button app-button-primary mt-6 inline-flex">
+            <a href="/notification-rules/create" class="app-button app-button-primary mt-6 inline-flex">
                 Create your first rule
             </a>
         </div>
@@ -79,7 +79,7 @@
                     <?php foreach ($rules as $ruleRow): $r = $ruleRow['NotificationRule']; ?>
                     <tr>
                         <td>
-                            <a href="<?php echo Router::url(array('action' => 'edit', $r['id'])); ?>" class="font-medium text-slate-900 hover:text-blue-600">
+                            <a href="/notification-rules/<?php echo $r['id']; ?>/edit" class="font-medium text-slate-900 hover:text-blue-600">
                                 <?php echo h($r['name'] ?? 'Unnamed Rule'); ?>
                             </a>
                             <p class="text-xs text-slate-400"><?php echo h(ucfirst($r['data_source'] ?? 'orders')); ?> · <?php echo h(str_replace('_', ' ', $r['date_scope_type'] ?? 'last_30_days')); ?></p>
@@ -107,33 +107,28 @@
                         </td>
                         <td>
                             <div class="flex items-center gap-1.5">
-                                <a href="<?php echo Router::url(array('action' => 'edit', $r['id'])); ?>" class="app-button app-button-sm">Edit</a>
+                                <a href="/notification-rules/<?php echo $r['id']; ?>/edit" class="app-button app-button-sm">Edit</a>
 
-                                <?php echo $this->Form->create(null, array('url' => array('action' => 'toggleStatus', $r['id']), 'style' => 'display:inline')); ?>
-                                <?php echo $this->Form->submit($r['status'] === 'active' ? 'Deactivate' : 'Activate', array(
-                                    'class' => 'app-button app-button-sm ' . ($r['status'] === 'active' ? 'app-button-danger' : 'app-button-soft'),
-                                    'div' => false,
-                                )); ?>
-                                <?php echo $this->Form->end(); ?>
+                                <form method="POST" action="/notification-rules/<?php echo $r['id']; ?>/toggle-status" style="display:inline">
+                                    <button type="submit" class="app-button app-button-sm <?php echo $r['status'] === 'active' ? 'app-button-danger' : 'app-button-soft'; ?>">
+                                        <?php echo $r['status'] === 'active' ? 'Deactivate' : 'Activate'; ?>
+                                    </button>
+                                </form>
 
-                                <?php echo $this->Form->create(null, array('url' => array('action' => 'duplicate', $r['id']), 'style' => 'display:inline')); ?>
-                                <?php echo $this->Form->submit('Copy', array('class' => 'app-button app-button-sm', 'div' => false)); ?>
-                                <?php echo $this->Form->end(); ?>
+                                <form method="POST" action="/notification-rules/<?php echo $r['id']; ?>/duplicate" style="display:inline">
+                                    <button type="submit" class="app-button app-button-sm">Copy</button>
+                                </form>
 
                                 <button type="button"
                                     class="app-button app-button-sm app-button-soft run-now-btn"
                                     data-id="<?php echo $r['id']; ?>"
-                                    data-url="<?php echo Router::url(array('action' => 'runNow', $r['id'])); ?>">
+                                    data-url="/notification-rules/<?php echo $r['id']; ?>/run">
                                     ▶ Run
                                 </button>
 
-                                <?php echo $this->Form->create(null, array('url' => array('action' => 'delete', $r['id']), 'style' => 'display:inline')); ?>
-                                <?php echo $this->Form->submit('Delete', array(
-                                    'class' => 'app-button app-button-sm app-button-danger',
-                                    'div' => false,
-                                    'onclick' => "return confirm('Delete this notification rule?')",
-                                )); ?>
-                                <?php echo $this->Form->end(); ?>
+                                <form method="POST" action="/notification-rules/<?php echo $r['id']; ?>/delete" style="display:inline" onsubmit="return confirm('Delete this notification rule?')">
+                                    <button type="submit" class="app-button app-button-sm app-button-danger">Delete</button>
+                                </form>
                             </div>
                         </td>
                     </tr>

@@ -16,7 +16,7 @@
     <!-- Sidebar -->
     <aside class="dc-sidebar">
         <div class="dc-sidebar-logo">
-            <a href="<?php echo Router::url(array('controller' => 'dashboard', 'action' => 'index')); ?>" class="dc-logo-link">
+            <a href="<?php echo Router::url(array('controller' => 'dashboard_reports', 'action' => 'index')); ?>" class="dc-logo-link">
                 <div class="dc-logo-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -31,18 +31,18 @@
             $ctrl = $this->params['controller'];
             $act  = $this->params['action'];
             $nav = array(
-                array('url' => array('controller' => 'dashboard', 'action' => 'index'),
+                array('url' => array('controller' => 'dashboard_reports', 'action' => 'index'),
                       'label' => 'Dashboard', 'icon' => 'home',
-                      'active' => $ctrl === 'dashboard'),
-                array('url' => array('controller' => 'orders', 'action' => 'history'),
+                      'active' => $ctrl === 'dashboard_reports'),
+                array('url' => array('controller' => 'orders_reports', 'action' => 'history'),
                       'label' => 'Order History', 'icon' => 'list',
-                      'active' => $ctrl === 'orders' && $act === 'history'),
-                array('url' => array('controller' => 'orders', 'action' => 'scheduledReports'),
+                      'active' => $ctrl === 'orders_reports' && $act === 'history'),
+                array('url' => array('controller' => 'orders_reports', 'action' => 'scheduledReports'),
                       'label' => 'Scheduled Reports', 'icon' => 'clock',
-                      'active' => $ctrl === 'orders' && $act === 'scheduledReports'),
-                array('url' => array('controller' => 'notification_rules', 'action' => 'index'),
+                      'active' => $ctrl === 'orders_reports' && $act === 'scheduledReports'),
+                array('url' => array('controller' => 'notification_rules_reports', 'action' => 'index'),
                       'label' => 'Notification Rules', 'icon' => 'bell',
-                      'active' => $ctrl === 'notification_rules'),
+                      'active' => $ctrl === 'notification_rules_reports'),
             );
             $icons = array(
                 'home'  => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>',

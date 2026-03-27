@@ -136,7 +136,7 @@ function orderHistoryData() {
         saveSchedule() {
             if (!this.schedEmail) { alert('Please enter a recipient email address'); return; }
             this.schedSaving = true;
-            fetch('<?php echo Router::url(array('controller' => 'orders', 'action' => 'saveScheduledReport')); ?>', {
+            fetch('<?php echo Router::url(array('controller' => 'orders_reports', 'action' => 'saveScheduledReport')); ?>', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'XMLHttpRequest'},
                 body: new URLSearchParams({
@@ -176,10 +176,10 @@ function orderHistoryData() {
             </p>
         </div>
         <div class="flex flex-wrap gap-3">
-            <a href="<?php echo Router::url(array('controller' => 'notification_rules', 'action' => 'index')); ?>" class="app-button">
+            <a href="<?php echo Router::url(array('controller' => 'notification_rules_reports', 'action' => 'index')); ?>" class="app-button">
                 Notification Rules
             </a>
-            <a href="<?php echo Router::url(array('controller' => 'orders', 'action' => 'scheduledReports')); ?>" class="app-button app-button-soft">
+            <a href="<?php echo Router::url(array('controller' => 'orders_reports', 'action' => 'scheduledReports')); ?>" class="app-button app-button-soft">
                 Scheduled Reports
             </a>
         </div>
@@ -285,7 +285,7 @@ function orderHistoryData() {
                             Schedule Report
                         </button>
                         <?php endif; ?>
-                        <a href="<?php echo Router::url(array('controller' => 'notification_rules', 'action' => 'create')); ?>" class="app-button app-button-primary app-button-sm">
+                        <a href="<?php echo Router::url(array('controller' => 'notification_rules_reports', 'action' => 'create')); ?>" class="app-button app-button-primary app-button-sm">
                             Create Notification Rule
                         </a>
                         <?php if (!empty($filters['search']) || $filters['dateFilter'] !== 'all' || $hasActiveFilters): ?>
@@ -624,7 +624,7 @@ function toggleAll(cb) {
 
 // Set flag via AJAX
 function setFlag(orderId, flag) {
-    fetch('<?php echo Router::url(array('controller' => 'orders', 'action' => 'updateFlag')); ?>', {
+    fetch('<?php echo Router::url(array('controller' => 'orders_reports', 'action' => 'updateFlag')); ?>', {
         method: 'POST',
         headers: {'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'XMLHttpRequest'},
         body: new URLSearchParams({id: orderId, flag: flag})
@@ -633,7 +633,7 @@ function setFlag(orderId, flag) {
 
 // Save note via AJAX
 function saveNote(orderId, note) {
-    fetch('<?php echo Router::url(array('controller' => 'orders', 'action' => 'updateNote')); ?>', {
+    fetch('<?php echo Router::url(array('controller' => 'orders_reports', 'action' => 'updateNote')); ?>', {
         method: 'POST',
         headers: {'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'XMLHttpRequest'},
         body: new URLSearchParams({id: orderId, note: note})

@@ -12,7 +12,7 @@
             </p>
         </div>
         <div class="flex flex-wrap gap-3">
-            <a href="<?php echo Router::url(array('controller' => 'orders', 'action' => 'history')); ?>" class="app-button">
+            <a href="<?php echo Router::url(array('controller' => 'orders_reports', 'action' => 'history')); ?>" class="app-button">
                 ← Order History
             </a>
         </div>
@@ -30,7 +30,7 @@
             </svg>
             <p class="text-slate-400 font-medium">No scheduled reports yet</p>
             <p class="text-slate-300 text-sm mt-1">Go to Order History and click "Schedule Report" to create one</p>
-            <a href="<?php echo Router::url(array('controller' => 'orders', 'action' => 'history')); ?>" class="app-button app-button-primary mt-6 inline-flex">
+            <a href="<?php echo Router::url(array('controller' => 'orders_reports', 'action' => 'history')); ?>" class="app-button app-button-primary mt-6 inline-flex">
                 Go to Order History
             </a>
         </div>
