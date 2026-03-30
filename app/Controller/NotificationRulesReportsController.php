@@ -7,8 +7,8 @@ class NotificationRulesReportsController extends AppController {
 
     public function index() {
         $this->set('title_for_layout', 'Notification Rules');
-        $userId = $this->Auth->user('id');
-        $conditions = array('NotificationRule.user_id' => $userId);
+        $customerId = $this->Auth->user('customer_id');
+        $conditions = array('NotificationRule.customer_id' => $customerId);
         $search = isset($this->request->query['search']) ? trim($this->request->query['search']) : '';
         $statusFilter = isset($this->request->query['status']) ? $this->request->query['status'] : 'all';
         $freqFilter = isset($this->request->query['frequency']) ? $this->request->query['frequency'] : 'all';
@@ -41,14 +41,14 @@ class NotificationRulesReportsController extends AppController {
         $this->set('userEmail', $userEmail);
         $this->set('validationError', null);
         if ($this->request->is('post')) {
-            $userId = $this->Auth->user('id');
+            $customerId = $this->Auth->user('customer_id');
             $validationError = $this->_validateGroupFilter($this->request->data);
             if ($validationError) {
                 $this->set('validationError', $validationError);
                 // Re-populate rule with submitted data so form fields retain values
                 $this->set('rule', array_merge(array('filters_json' => isset($this->request->data['filters_json']) ? $this->request->data['filters_json'] : '{}'), $this->request->data));
             } else {
-                $data = $this->_extractRuleData($this->request->data, $userId);
+                $data = $this->_extractRuleData($this->request->data, $customerId);
                 $this->NotificationRule->create();
                 if ($this->NotificationRule->save($data)) {
                     $this->Session->setFlash('Notification rule created successfully!');
@@ -63,9 +63,9 @@ class NotificationRulesReportsController extends AppController {
     public function edit($id) {
         $this->set('title_for_layout', 'Edit Notification Rule');
         $this->set('isEdit', true);
-        $userId = $this->Auth->user('id');
+        $customerId = $this->Auth->user('customer_id');
         $rule = $this->NotificationRule->find('first', array(
-            'conditions' => array('NotificationRule.id' => (int)$id, 'NotificationRule.user_id' => $userId),
+            'conditions' => array('NotificationRule.id' => (int)$id, 'NotificationRule.customer_id' => $customerId),
         ));
         if (!$rule) {
             $this->Session->setFlash('Rule not found.');
@@ -83,7 +83,7 @@ class NotificationRulesReportsController extends AppController {
                 // Re-populate rule with submitted data so form fields retain values
                 $this->set('rule', array_merge($rule['NotificationRule'], $this->request->data));
             } else {
-                $data = $this->_extractRuleData($this->request->data, $userId);
+                $data = $this->_extractRuleData($this->request->data, $customerId);
                 $data['id'] = (int)$id;
                 if ($this->NotificationRule->save($data)) {
                     $this->Session->setFlash('Notification rule updated successfully!');
@@ -97,9 +97,9 @@ class NotificationRulesReportsController extends AppController {
 
     public function delete($id) {
         $this->request->allowMethod('post');
-        $userId = $this->Auth->user('id');
+        $customerId = $this->Auth->user('customer_id');
         $this->NotificationRule->deleteAll(array(
-            'NotificationRule.id' => (int)$id, 'NotificationRule.user_id' => $userId,
+            'NotificationRule.id' => (int)$id, 'NotificationRule.customer_id' => $customerId,
         ));
         $this->Session->setFlash('Notification rule deleted.');
         return $this->redirect(array('action' => 'index'));
@@ -107,9 +107,9 @@ class NotificationRulesReportsController extends AppController {
 
     public function toggleStatus($id) {
         $this->request->allowMethod('post');
-        $userId = $this->Auth->user('id');
+        $customerId = $this->Auth->user('customer_id');
         $rule   = $this->NotificationRule->find('first', array(
-            'conditions' => array('NotificationRule.id' => (int)$id, 'NotificationRule.user_id' => $userId),
+            'conditions' => array('NotificationRule.id' => (int)$id, 'NotificationRule.customer_id' => $customerId),
         ));
         if ($rule) {
             $currentStatus = $rule['NotificationRule']['status'];
@@ -133,9 +133,9 @@ class NotificationRulesReportsController extends AppController {
 
     public function duplicate($id) {
         $this->request->allowMethod('post');
-        $userId = $this->Auth->user('id');
+        $customerId = $this->Auth->user('customer_id');
         $rule   = $this->NotificationRule->find('first', array(
-            'conditions' => array('NotificationRule.id' => (int)$id, 'NotificationRule.user_id' => $userId),
+            'conditions' => array('NotificationRule.id' => (int)$id, 'NotificationRule.customer_id' => $customerId),
         ));
         if ($rule) {
             $data = $rule['NotificationRule'];
@@ -157,9 +157,9 @@ class NotificationRulesReportsController extends AppController {
         $this->autoRender = false;
         $this->response->type('json');
 
-        $userId = $this->Auth->user('id');
+        $customerId = $this->Auth->user('customer_id');
         $rule = $this->NotificationRule->find('first', array(
-            'conditions' => array('NotificationRule.id' => (int)$id, 'NotificationRule.user_id' => $userId),
+            'conditions' => array('NotificationRule.id' => (int)$id, 'NotificationRule.customer_id' => $customerId),
         ));
 
         if (!$rule) {
@@ -281,7 +281,7 @@ class NotificationRulesReportsController extends AppController {
         return 'Your Group Filter is empty. Please select a field and operator for at least one filter row.';
     }
 
-    private function _extractRuleData($postData, $userId) {
+    private function _extractRuleData($postData, $customerId) {
         $status    = isset($postData['status']) ? $postData['status'] : 'draft';
         $frequency = isset($postData['frequency']) ? $postData['frequency'] : 'daily';
         $sendTime  = isset($postData['send_time']) ? $postData['send_time'] : '08:00';
@@ -298,7 +298,7 @@ class NotificationRulesReportsController extends AppController {
             $name = ucfirst($frequency) . ' ' . $dateLabel . ' Notification';
         }
         return array(
-            'user_id' => $userId, 'name' => $name,
+            'customer_id' => $customerId, 'name' => $name,
             'channel'          => isset($postData['channel']) ? $postData['channel'] : 'email',
             'data_source'      => isset($postData['data_source']) ? $postData['data_source'] : 'orders',
             'status'           => $status,

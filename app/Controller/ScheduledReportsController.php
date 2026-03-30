@@ -8,7 +8,7 @@ class ScheduledReportsController extends AppController {
 
 	public function index() {
 		$service = new ScheduledReportService();
-		$reports = $service->getForUser($this->Auth->user('id'));
+		$reports = $service->getForCustomer($this->Auth->user('customer_id'));
 
 		$activeCount = 0; $inactiveCount = 0; $lastRunTodayCount = 0;
 		$today = date('Y-m-d');
@@ -32,14 +32,14 @@ class ScheduledReportsController extends AppController {
 
 	public function toggleActive($id) {
 		$service = new ScheduledReportService();
-		$service->toggleActive($id, $this->Auth->user('id'));
+		$service->toggleActive($id, $this->Auth->user('customer_id'));
 		return $this->redirect(array('action' => 'index'));
 	}
 
 	public function edit($id) {
 		$this->request->allowMethod('post');
 		$service = new ScheduledReportService();
-		$service->updateReport($id, $this->Auth->user('id'), $this->request->data);
+		$service->updateReport($id, $this->Auth->user('customer_id'), $this->request->data);
 		$this->flashSuccess('Schedule updated successfully.');
 		return $this->redirect(array('action' => 'index'));
 	}
@@ -47,7 +47,7 @@ class ScheduledReportsController extends AppController {
 	public function delete($id) {
 		$this->request->allowMethod('post');
 		$service = new ScheduledReportService();
-		$service->delete($id, $this->Auth->user('id'));
+		$service->delete($id, $this->Auth->user('customer_id'));
 		$this->flashSuccess('Scheduled report deleted.');
 		return $this->redirect(array('action' => 'index'));
 	}

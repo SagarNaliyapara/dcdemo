@@ -39,7 +39,7 @@ class ScheduledReportService {
 		return $orderService->getAllOrders($filters);
 	}
 
-	public function createScheduledReport($userId, $filters, $data) {
+	public function createScheduledReport($customerId, $filters, $data) {
 		App::uses('ClassRegistry', 'Utility');
 		$ScheduledReport = ClassRegistry::init('ScheduledReport');
 
@@ -52,7 +52,7 @@ class ScheduledReportService {
 
 		$record = array(
 			'ScheduledReport' => array(
-				'user_id' => $userId,
+				'customer_id' => $customerId,
 				'name' => $name,
 				'filters_json' => json_encode($filters),
 				'frequency' => $frequency,
@@ -71,12 +71,12 @@ class ScheduledReportService {
 		return $ScheduledReport->save($record);
 	}
 
-	public function updateReport($reportId, $userId, $data) {
+	public function updateReport($reportId, $customerId, $data) {
 		App::uses('ClassRegistry', 'Utility');
 		$ScheduledReport = ClassRegistry::init('ScheduledReport');
 
 		$report = $ScheduledReport->find('first', array(
-			'conditions' => array('id' => $reportId, 'user_id' => $userId),
+			'conditions' => array('id' => $reportId, 'customer_id' => $customerId),
 		));
 		if (!$report) return false;
 
@@ -100,26 +100,26 @@ class ScheduledReportService {
 		));
 	}
 
-	public function getForUser($userId) {
+	public function getForCustomer($customerId) {
 		App::uses('ClassRegistry', 'Utility');
 		$ScheduledReport = ClassRegistry::init('ScheduledReport');
 		return $ScheduledReport->find('all', array(
-			'conditions' => array('user_id' => $userId),
+			'conditions' => array('customer_id' => $customerId),
 			'order' => array('created DESC'),
 		));
 	}
 
-	public function delete($reportId, $userId) {
+	public function delete($reportId, $customerId) {
 		App::uses('ClassRegistry', 'Utility');
 		$ScheduledReport = ClassRegistry::init('ScheduledReport');
-		return $ScheduledReport->deleteAll(array('id' => $reportId, 'user_id' => $userId));
+		return $ScheduledReport->deleteAll(array('id' => $reportId, 'customer_id' => $customerId));
 	}
 
-	public function toggleActive($reportId, $userId) {
+	public function toggleActive($reportId, $customerId) {
 		App::uses('ClassRegistry', 'Utility');
 		$ScheduledReport = ClassRegistry::init('ScheduledReport');
 		$report = $ScheduledReport->find('first', array(
-			'conditions' => array('id' => $reportId, 'user_id' => $userId),
+			'conditions' => array('id' => $reportId, 'customer_id' => $customerId),
 		));
 		if (!$report) return false;
 		return $ScheduledReport->save(array(

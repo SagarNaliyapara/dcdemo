@@ -121,7 +121,7 @@ class OrdersReportsController extends AppController {
 
     public function saveScheduledReport() {
         $this->request->allowMethod('post');
-        $userId = $this->Auth->user('id');
+        $customerId = $this->Auth->user('customer_id');
         $name      = isset($this->request->data['name']) ? trim($this->request->data['name']) : '';
         $frequency = isset($this->request->data['frequency']) ? $this->request->data['frequency'] : 'daily';
         $sendTime  = isset($this->request->data['send_time']) ? $this->request->data['send_time'] : '08:00';
@@ -141,7 +141,7 @@ class OrdersReportsController extends AppController {
         $nextRun = $this->_calculateNextRun($frequency, $sendTime, $dayOfWeek, $dayOfMonth);
         $this->ScheduledReport->create();
         $saved = $this->ScheduledReport->save(array(
-            'user_id' => $userId, 'name' => $name, 'filters_json' => $filtersJson,
+            'customer_id' => $customerId, 'name' => $name, 'filters_json' => $filtersJson,
             'frequency' => $frequency, 'send_time' => $sendTime,
             'day_of_week'  => $frequency === 'weekly' ? (int)$dayOfWeek : null,
             'day_of_month' => $frequency === 'monthly' ? (int)$dayOfMonth : null,
@@ -160,9 +160,9 @@ class OrdersReportsController extends AppController {
 
     public function scheduledReports() {
         $this->set('title_for_layout', 'Scheduled Reports');
-        $userId = $this->Auth->user('id');
+        $customerId = $this->Auth->user('customer_id');
         $reports = $this->ScheduledReport->find('all', array(
-            'conditions' => array('ScheduledReport.user_id' => $userId),
+            'conditions' => array('ScheduledReport.customer_id' => $customerId),
             'order' => array('ScheduledReport.created' => 'DESC'),
         ));
         $this->set(compact('reports'));
@@ -170,9 +170,9 @@ class OrdersReportsController extends AppController {
 
     public function deleteScheduledReport($id) {
         $this->request->allowMethod('post');
-        $userId = $this->Auth->user('id');
+        $customerId = $this->Auth->user('customer_id');
         $this->ScheduledReport->deleteAll(array(
-            'ScheduledReport.id' => (int)$id, 'ScheduledReport.user_id' => $userId,
+            'ScheduledReport.id' => (int)$id, 'ScheduledReport.customer_id' => $customerId,
         ));
         $this->Session->setFlash('Scheduled report deleted.');
         return $this->redirect(array('action' => 'scheduledReports'));
@@ -180,9 +180,9 @@ class OrdersReportsController extends AppController {
 
     public function toggleScheduledReport($id) {
         $this->request->allowMethod('post');
-        $userId = $this->Auth->user('id');
+        $customerId = $this->Auth->user('customer_id');
         $report = $this->ScheduledReport->find('first', array(
-            'conditions' => array('ScheduledReport.id' => (int)$id, 'ScheduledReport.user_id' => $userId),
+            'conditions' => array('ScheduledReport.id' => (int)$id, 'ScheduledReport.customer_id' => $customerId),
         ));
         if ($report) {
             $this->ScheduledReport->id = (int)$id;

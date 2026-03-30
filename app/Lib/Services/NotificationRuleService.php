@@ -2,11 +2,11 @@
 
 class NotificationRuleService {
 
-	public function listForUser($userId, $filters = array(), $perPage = 15, $page = 1) {
+	public function listForCustomer($customerId, $filters = array(), $perPage = 15, $page = 1) {
 		App::uses('ClassRegistry', 'Utility');
 		$NotificationRule = ClassRegistry::init('NotificationRule');
 
-		$conditions = array('NotificationRule.user_id' => $userId);
+		$conditions = array('NotificationRule.customer_id' => $customerId);
 		if (!empty($filters['search'])) {
 			$s = '%' . trim($filters['search']) . '%';
 			$conditions['OR'] = array(
@@ -39,10 +39,10 @@ class NotificationRuleService {
 		);
 	}
 
-	public function getSummaryForUser($userId) {
+	public function getSummaryForCustomer($customerId) {
 		App::uses('ClassRegistry', 'Utility');
 		$NotificationRule = ClassRegistry::init('NotificationRule');
-		$all = $NotificationRule->find('all', array('conditions' => array('user_id' => $userId)));
+		$all = $NotificationRule->find('all', array('conditions' => array('customer_id' => $customerId)));
 		$counts = array('total' => 0, 'active' => 0, 'inactive' => 0, 'attention' => 0);
 		foreach ($all as $r) {
 			$counts['total']++;
@@ -54,7 +54,7 @@ class NotificationRuleService {
 		return $counts;
 	}
 
-	public function create($userId, $data) {
+	public function create($customerId, $data) {
 		App::uses('ClassRegistry', 'Utility');
 		$NotificationRule = ClassRegistry::init('NotificationRule');
 		$NotificationRule->create();
@@ -66,7 +66,7 @@ class NotificationRuleService {
 		$status = $data['status'];
 
 		$record = array('NotificationRule' => array(
-			'user_id' => $userId,
+			'customer_id' => $customerId,
 			'name' => !empty($data['name']) ? $data['name'] : $this->buildAutoName($data),
 			'channel' => $data['channel'] ?? 'email',
 			'data_source' => $data['data_source'] ?? 'orders',
@@ -90,10 +90,10 @@ class NotificationRuleService {
 		return $NotificationRule->save($record);
 	}
 
-	public function update($ruleId, $userId, $data) {
+	public function update($ruleId, $customerId, $data) {
 		App::uses('ClassRegistry', 'Utility');
 		$NotificationRule = ClassRegistry::init('NotificationRule');
-		$rule = $NotificationRule->find('first', array('conditions' => array('id' => $ruleId, 'user_id' => $userId)));
+		$rule = $NotificationRule->find('first', array('conditions' => array('id' => $ruleId, 'customer_id' => $customerId)));
 		if (!$rule) return false;
 
 		$frequency = $data['frequency'];
@@ -125,10 +125,10 @@ class NotificationRuleService {
 		)));
 	}
 
-	public function activate($ruleId, $userId) {
+	public function activate($ruleId, $customerId) {
 		App::uses('ClassRegistry', 'Utility');
 		$NotificationRule = ClassRegistry::init('NotificationRule');
-		$rule = $NotificationRule->find('first', array('conditions' => array('id' => $ruleId, 'user_id' => $userId)));
+		$rule = $NotificationRule->find('first', array('conditions' => array('id' => $ruleId, 'customer_id' => $customerId)));
 		if (!$rule) return false;
 		$r = $rule['NotificationRule'];
 		return $NotificationRule->save(array('NotificationRule' => array(
@@ -140,7 +140,7 @@ class NotificationRuleService {
 		)));
 	}
 
-	public function deactivate($ruleId, $userId) {
+	public function deactivate($ruleId, $customerId) {
 		App::uses('ClassRegistry', 'Utility');
 		$NotificationRule = ClassRegistry::init('NotificationRule');
 		return $NotificationRule->save(array('NotificationRule' => array(
@@ -151,16 +151,16 @@ class NotificationRuleService {
 		)));
 	}
 
-	public function delete($ruleId, $userId) {
+	public function delete($ruleId, $customerId) {
 		App::uses('ClassRegistry', 'Utility');
 		$NotificationRule = ClassRegistry::init('NotificationRule');
-		return $NotificationRule->deleteAll(array('id' => $ruleId, 'user_id' => $userId));
+		return $NotificationRule->deleteAll(array('id' => $ruleId, 'customer_id' => $customerId));
 	}
 
-	public function duplicate($ruleId, $userId) {
+	public function duplicate($ruleId, $customerId) {
 		App::uses('ClassRegistry', 'Utility');
 		$NotificationRule = ClassRegistry::init('NotificationRule');
-		$rule = $NotificationRule->find('first', array('conditions' => array('id' => $ruleId, 'user_id' => $userId)));
+		$rule = $NotificationRule->find('first', array('conditions' => array('id' => $ruleId, 'customer_id' => $customerId)));
 		if (!$rule) return false;
 		$copy = $rule['NotificationRule'];
 		unset($copy['id']);
